@@ -1,0 +1,505 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Components">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Components\Components">
+      <UniqueIdentifier>{05088e23-d549-42b4-8a75-131cc8d466ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Detours">
+      <UniqueIdentifier>{00cca946-65c7-471b-99a2-edda8ae6fdf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Extensions">
+      <UniqueIdentifier>{94fc7a1f-83a0-4190-b895-cd88a20dd19e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Extensions\Extensions">
+      <UniqueIdentifier>{3c7e2d23-e45d-4322-938e-6f1acf0505bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules">
+      <UniqueIdentifier>{241bcd9e-dd37-48d9-a598-cae1f11a842b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules\Mods">
+      <UniqueIdentifier>{a25fc3f1-953b-4e4a-a31b-976562030599}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui">
+      <UniqueIdentifier>{77c07b71-c4bf-459c-bf91-d5231dbec1dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui\kiero">
+      <UniqueIdentifier>{adba3b28-717e-4aa1-ae67-dc7a066973ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui\kiero\minhook">
+      <UniqueIdentifier>{a2f3e24c-01ba-47a4-bc1b-43946f171a13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui\kiero\minhook\src">
+      <UniqueIdentifier>{2e89a09e-cfc4-459b-9ed8-00ee4e60bb2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui\kiero\minhook\include">
+      <UniqueIdentifier>{70ca7159-0e2a-442b-a9ce-7dcd87921b93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui\kiero\minhook\dll_resources">
+      <UniqueIdentifier>{4f39b5ea-e9d8-479b-9112-8362c9fb3521}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui\kiero\minhook\src\hde">
+      <UniqueIdentifier>{cc2a8fb9-6e27-4319-aafe-54cb96bd8147}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Voltage">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="RLSDK">
+      <UniqueIdentifier>{bf997710-69cb-4905-a533-36e50969b004}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RLSDK\SDK_HEADERS">
+      <UniqueIdentifier>{8927f793-2a32-4168-8c70-61a0f0dac8b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json">
+      <UniqueIdentifier>{5c9f8372-b7da-4c38-ae92-65a17dfabeaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json\json">
+      <UniqueIdentifier>{09eff984-6c8f-4c85-9234-7d3cd9aaf262}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui\Extensions">
+      <UniqueIdentifier>{3645d2d5-c6ce-45e3-bb31-61a3aa5f6126}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui\Fonts">
+      <UniqueIdentifier>{78a6e82b-7d08-4d6b-ae79-98b45bd100c3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Voltage</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\Component.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\Components\Console.cpp">
+      <Filter>Components\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\Components\Core.cpp">
+      <Filter>Components\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\Components\Events.cpp">
+      <Filter>Components\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\Components\GameState.cpp">
+      <Filter>Components\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\Components\Instances.cpp">
+      <Filter>Components\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\Components\Manager.cpp">
+      <Filter>Components\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Extensions\Extensions\Colors.cpp">
+      <Filter>Extensions\Extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="Extensions\Extensions\Memory.cpp">
+      <Filter>Extensions\Extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="Extensions\Extensions\UnrealMemory.cpp">
+      <Filter>Extensions\Extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Voltage</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Module.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Extensions\Extensions\Math.cpp">
+      <Filter>Extensions\Extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="Extensions\Extensions\Formatting.cpp">
+      <Filter>Extensions\Extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\kiero\kiero.cpp">
+      <Filter>ImGui\kiero</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\kiero\minhook\src\buffer.c">
+      <Filter>ImGui\kiero\minhook\src</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\kiero\minhook\src\hook.c">
+      <Filter>ImGui\kiero\minhook\src</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\kiero\minhook\src\trampoline.c">
+      <Filter>ImGui\kiero\minhook\src</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\kiero\minhook\src\hde\hde32.c">
+      <Filter>ImGui\kiero\minhook\src\hde</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\kiero\minhook\src\hde\hde64.c">
+      <Filter>ImGui\kiero\minhook\src\hde</Filter>
+    </ClCompile>
+    <ClCompile Include="RLSDK\GameDefines.cpp">
+      <Filter>RLSDK</Filter>
+    </ClCompile>
+    <ClCompile Include="RLSDK\SDK_HEADERS\AkAudio_classes.cpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClCompile>
+    <ClCompile Include="RLSDK\SDK_HEADERS\Core_classes.cpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClCompile>
+    <ClCompile Include="RLSDK\SDK_HEADERS\Engine_classes.cpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClCompile>
+    <ClCompile Include="RLSDK\SDK_HEADERS\GFxUI_classes.cpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClCompile>
+    <ClCompile Include="RLSDK\SDK_HEADERS\IpDrv_classes.cpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClCompile>
+    <ClCompile Include="RLSDK\SDK_HEADERS\OnlineSubsystemEOS_classes.cpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClCompile>
+    <ClCompile Include="RLSDK\SDK_HEADERS\ProjectX_classes.cpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClCompile>
+    <ClCompile Include="RLSDK\SDK_HEADERS\TAGame_classes.cpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClCompile>
+    <ClCompile Include="RLSDK\SDK_HEADERS\WinDrv_classes.cpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClCompile>
+    <ClCompile Include="RLSDK\SDK_HEADERS\XAudio2_classes.cpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClCompile>
+    <ClCompile Include="json\jsoncpp.cpp">
+      <Filter>json</Filter>
+    </ClCompile>
+    <ClCompile Include="hmac_sha256.c">
+      <Filter>Voltage</Filter>
+    </ClCompile>
+    <ClCompile Include="sha256.c">
+      <Filter>Voltage</Filter>
+    </ClCompile>
+    <ClCompile Include="base64.cpp">
+      <Filter>Voltage</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui\Extensions\imgui_extensions.cpp">
+      <Filter>ImGui\Extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\Components\MemoryAllocator.cpp">
+      <Filter>Components\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui\imgui.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui\imgui_demo.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui\imgui_draw.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui\imgui_impl_dx11.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui\imgui_impl_win32.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui\imgui_tables.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui\imgui_widgets.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Mods\Placeholder.cpp">
+      <Filter>Modules\Mods</Filter>
+    </ClCompile>
+    <ClCompile Include="RLSDK\SDK_HEADERS\OnlineSubsystemSteamworks_classes.cpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Components\Component.hpp">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\Includes.hpp">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\Components\Console.hpp">
+      <Filter>Components\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\Components\Core.hpp">
+      <Filter>Components\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\Components\Events.hpp">
+      <Filter>Components\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\Components\GameState.hpp">
+      <Filter>Components\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\Components\Instances.hpp">
+      <Filter>Components\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\Components\Manager.hpp">
+      <Filter>Components\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Detours\detours.h">
+      <Filter>Detours</Filter>
+    </ClInclude>
+    <ClInclude Include="Detours\detver.h">
+      <Filter>Detours</Filter>
+    </ClInclude>
+    <ClInclude Include="Detours\syelog.h">
+      <Filter>Detours</Filter>
+    </ClInclude>
+    <ClInclude Include="Extensions\Includes.hpp">
+      <Filter>Extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="Extensions\Extensions\Colors.hpp">
+      <Filter>Extensions\Extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="Extensions\Extensions\Memory.hpp">
+      <Filter>Extensions\Extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="Extensions\Extensions\UnrealMemory.hpp">
+      <Filter>Extensions\Extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.hpp">
+      <Filter>Voltage</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Includes.hpp">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Module.hpp">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Extensions\Extensions\Math.hpp">
+      <Filter>Extensions\Extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="Extensions\Extensions\Formatting.hpp">
+      <Filter>Extensions\Extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\kiero\kiero.h">
+      <Filter>ImGui\kiero</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\kiero\minhook\include\MinHook.h">
+      <Filter>ImGui\kiero\minhook\include</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\kiero\minhook\src\buffer.h">
+      <Filter>ImGui\kiero\minhook\src</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\kiero\minhook\src\trampoline.h">
+      <Filter>ImGui\kiero\minhook\src</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\kiero\minhook\src\hde\hde32.h">
+      <Filter>ImGui\kiero\minhook\src\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\kiero\minhook\src\hde\hde64.h">
+      <Filter>ImGui\kiero\minhook\src\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\kiero\minhook\src\hde\pstdint.h">
+      <Filter>ImGui\kiero\minhook\src\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\kiero\minhook\src\hde\table32.h">
+      <Filter>ImGui\kiero\minhook\src\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\kiero\minhook\src\hde\table64.h">
+      <Filter>ImGui\kiero\minhook\src\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\includes.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\GameDefines.hpp">
+      <Filter>RLSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SdkHeaders.hpp">
+      <Filter>RLSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\AkAudio_classes.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\AkAudio_parameters.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\AkAudio_structs.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\Core_parameters.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\Core_structs.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\Engine_classes.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\Engine_parameters.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\Engine_structs.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\GFxUI_classes.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\GFxUI_parameters.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\GFxUI_structs.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\IpDrv_classes.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\IpDrv_parameters.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\IpDrv_structs.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\OnlineSubsystemEOS_classes.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\OnlineSubsystemEOS_parameters.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\OnlineSubsystemEOS_structs.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\ProjectX_classes.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\ProjectX_parameters.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\ProjectX_structs.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\TAGame_classes.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\TAGame_parameters.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\TAGame_structs.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\WinDrv_classes.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\WinDrv_parameters.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\WinDrv_structs.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\XAudio2_classes.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\XAudio2_parameters.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\XAudio2_structs.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json\json.h">
+      <Filter>json\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json\json-forwards.h">
+      <Filter>json\json</Filter>
+    </ClInclude>
+    <ClInclude Include="hmac_sha256.h">
+      <Filter>Voltage</Filter>
+    </ClInclude>
+    <ClInclude Include="sha256.h">
+      <Filter>Voltage</Filter>
+    </ClInclude>
+    <ClInclude Include="base64.h">
+      <Filter>Voltage</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui\Extensions\imgui_extensions.h">
+      <Filter>ImGui\Extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\Components\MemoryAllocator.hpp">
+      <Filter>Components\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui\imconfig.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui\imgui.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui\imgui_impl_dx11.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui\imgui_impl_win32.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui\imgui_internal.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui\ImGuiExtension.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui\imstb_rectpack.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui\imstb_textedit.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui\imstb_truetype.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui\Includes.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\Core_classes.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="Network.h">
+      <Filter>Voltage</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Mods\Placeholder.hpp">
+      <Filter>Modules\Mods</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\OnlineSubsystemSteamworks_classes.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\OnlineSubsystemSteamworks_parameters.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="RLSDK\SDK_HEADERS\OnlineSubsystemSteamworks_structs.hpp">
+      <Filter>RLSDK\SDK_HEADERS</Filter>
+    </ClInclude>
+    <ClInclude Include="UDP.hpp">
+      <Filter>Voltage</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Detours\detours.lib">
+      <Filter>Detours</Filter>
+    </Library>
+    <Library Include="Detours\syelog.lib">
+      <Filter>Detours</Filter>
+    </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Detours\detours.pdb">
+      <Filter>Detours</Filter>
+    </None>
+    <None Include="ImGui\kiero\minhook\dll_resources\MinHook.def">
+      <Filter>ImGui\kiero\minhook\dll_resources</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ImGui\kiero\minhook\dll_resources\MinHook.rc">
+      <Filter>ImGui\kiero\minhook\dll_resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="ImGui\imgui\Fonts\Panton-BlackCaps.otf">
+      <Filter>ImGui\Fonts</Filter>
+    </Font>
+    <Font Include="ImGui\imgui\Fonts\Panton-BlackitalicCaps.otf">
+      <Filter>ImGui\Fonts</Filter>
+    </Font>
+    <Font Include="ImGui\imgui\Fonts\Panton-LightCaps.otf">
+      <Filter>ImGui\Fonts</Filter>
+    </Font>
+    <Font Include="ImGui\imgui\Fonts\Panton-LightitalicCaps.otf">
+      <Filter>ImGui\Fonts</Filter>
+    </Font>
+  </ItemGroup>
+</Project>
