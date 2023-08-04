@@ -465,7 +465,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			if (ImGui::Button("Titles", tabSize)) { tab = 0; }
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Button, tab == 2 ? active : inactive);
-			if (ImGui::Button("Textures", tabSize)) { tab = 2; }
+			if (ImGui::Button("Custom UI", tabSize)) { tab = 2; }
 			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Button, tab == 3 ? active : inactive);
 			if (ImGui::Button("Colors", tabSize)) { tab = 3; }
@@ -872,23 +872,125 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			{
 				ImGui::BeginChild(1, { }, true);
 				//start
-				if (ImGui::CollapsingHeader("Custom Banners")) {
+				if (ImGui::CollapsingHeader("Custom Modals")) {
 					ImGui::Indent(15);
-					ImGui::Checkbox("Custom Banner", &Events.custombanners);
-					ImGui::Text("Rename your file to Banner.png and put it in the banners folder, then enable that and reload your banner.");
-					ImGui::Unindent();
+					// Enum selector for the EModalType
+					const char* items[] = { "Fun", "Ban", "Warning" };
+					static int item_current = static_cast<int>(Events.createdmodaltype);  // Assuming createdmodaltype is globally accessible
+					ImGui::Combo("Modal Type", &item_current, items, IM_ARRAYSIZE(items));
+					Events.createdmodaltype = static_cast<EModalType>(item_current);
+
+					// Checkbox for the createmodalrn
+					if (ImGui::Button("Create Model")) { Events.createmodalrn = true; }
+
+					// Color picker for the modalcolor
+					static ImVec4 color = ImVec4(Events.custommodalcolor.R / 255.f, Events.custommodalcolor.G / 255.f, Events.custommodalcolor.B / 255.f, Events.custommodalcolor.A / 255.f);
+					if (ImGui::ColorEdit4("Modal Color", (float*)&color))
+					{
+						Events.custommodalcolor.R = static_cast<uint8_t>(color.x * 255.f);
+						Events.custommodalcolor.G = static_cast<uint8_t>(color.y * 255.f);
+						Events.custommodalcolor.B = static_cast<uint8_t>(color.z * 255.f);
+						Events.custommodalcolor.A = static_cast<uint8_t>(color.w * 255.f);
+					}
+
+					// Input text for the modaltitle
+					static char title[256];
+					strcpy(title, Events.custommodaltitle.c_str());
+					if (ImGui::InputText("Modal Title", title, IM_ARRAYSIZE(title)))
+					{
+						Events.custommodaltitle = std::string(title);
+					}
+
+					// Input text for the modalbody
+					static char body[256];
+					strcpy(body, Events.custommodalbody.c_str());
+					if (ImGui::InputText("Modal Body", body, IM_ARRAYSIZE(body)))
+					{
+						Events.custommodalbody = std::string(body);
+					}
+
+					if (item_current == 1) {
+						ImGui::Separator();
+						// Dynamic list for the banCitations
+						for (int i = 0; i < Events.banCitations.size(); i++) {
+							ImGui::PushID(i);
+
+							char buf[64];
+							strncpy(buf, Events.banCitations[i].c_str(), sizeof(buf));
+							buf[sizeof(buf) - 1] = 0;
+							if (ImGui::InputText("##valuecitation", buf, sizeof(buf))) {
+								Events.banCitations[i] = buf;
+							}
+
+							// Allow removing this element
+							if (ImGui::Button("Remove Citation")) {
+								Events.banCitations.erase(Events.banCitations.begin() + i);
+							}
+
+							ImGui::PopID();
+						}
+
+						// Add new string to vector
+						static char buf[64] = "";
+						ImGui::InputText("##addcitation", buf, sizeof(buf));
+						if (ImGui::Button("Add Citation")) {
+							Events.banCitations.push_back(buf);
+							buf[0] = '\0';  // Clear input text
+						}
+
+						ImGui::Separator();
+					}
+
+					// Dynamic list for the modalbuttons
+					for (size_t i = 0; i < Events.modalbuttons.size(); i++)
+					{
+						ImGui::PushID(i + 2);
+
+						char buf[64];
+						strncpy(buf, Events.modalbuttons[i].c_str(), sizeof(buf));
+						buf[sizeof(buf) - 1] = 0;
+						if (ImGui::InputText("##valuebutton", buf, sizeof(buf))) {
+							Events.modalbuttons[i] = buf;
+						}
+
+						// Allow removing this element
+						if (ImGui::Button("Remove Button")) {
+							Events.modalbuttons.erase(Events.modalbuttons.begin() + i);
+						}
+
+						ImGui::PopID();
+					}
+
+					// Add new string to vector
+					static char buf[64] = "";
+					ImGui::InputText("##addmodalbuttons", buf, sizeof(buf));
+					if (ImGui::Button("Add Button")) {
+						Events.modalbuttons.push_back(buf);
+						buf[0] = '\0';  // Clear input text
+					}
+					ImGui::Unindent(15);
 				}
 
-				ImGui::Text(" ");
+				if (ImGui::CollapsingHeader("UI Config")) {
+					ImGui::Indent(15);
+					ImGui::Checkbox("Crate Animations", &Events.crateanimations);
+					
+					static const char* items[] = { "Default", "Utopia Snow", "Haunted Station", "Beach", "Beach Night", "Halloween", "China",
+								"Park Day", "Music", "Throwback Hockey", "Circuit", "Outlaw", "Arc", "Park Snowy",
+								"Tokyo Toon", "Utopia Lux", "Street", "Fire And Ice", "Oasis", "Vida" };
 
-				ImGui::Text("More Soon...");
+					static int item_current = Events.mainmenubackground;
 
-				//if (ImGui::CollapsingHeader("Custom Balls")) {
-				//	ImGui::Indent(15);
-				//	ImGui::Checkbox("Custom Ball", &Events.customballtexture);
-				//	ImGui::Text("Rename your file to Ball.png and put it in the balls folder, then enable that and reload your ball.");
-				//	ImGui::Unindent();
-				//}
+					ImGui::Combo("Main Menu Background", &item_current, items, IM_ARRAYSIZE(items));
+					EMainMenuBackground currentSelection = static_cast<EMainMenuBackground>(item_current);
+
+					Events.mainmenubackground = (uint8_t)currentSelection;
+
+					if (ImGui::Button("Update Menu Background")) {
+						Events.needtochangemenubg = true;
+					}
+					ImGui::Unindent(15);
+				}
 
 				ImGui::Separator();
 				if (ImGui::Button("Open Textures Folder")) { 

@@ -140,8 +140,8 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 
 	if (Events.platform == VoltagePlatform::Steam) //steam 
 	{
-		GObjectsAddress = entryPoint + 0x250A678;
-		GNamesAddress = entryPoint + 0x250A630;
+		GObjectsAddress = entryPoint + 0x249E8D8;
+		GNamesAddress = entryPoint + 0x249E890;
 	}
 	else if (Events.platform == VoltagePlatform::Epic) //epic
 	{
@@ -203,7 +203,7 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 				return;
 			}
 
-			FUniqueNetId onlinePlayerID = Core.localPlayer->Player->OnlinePlayer->PlayerID;
+			/*FUniqueNetId onlinePlayerID = Core.localPlayer->Player->OnlinePlayer->PlayerID;
 
 			std::ostringstream uidStreamCompare;
 
@@ -221,7 +221,7 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 					Console.Error("[Core Component] Error identifying player");
 					return;
 				}
-			}
+			}*/
 		}
 
 		// Making sure we have Voltage textures

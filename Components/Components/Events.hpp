@@ -613,6 +613,16 @@ public:
 	std::string carprimarycolorsforfreeplay = " ";
 	std::string carsecondarycolorsforfreeplay = " ";
 	bool customcarcolors = false;
+	bool crateanimations = true;
+	UUIConfig_TA* UIConfig = nullptr;
+	EModalType createdmodaltype;
+	bool createmodalrn = false;
+	bool rgbmodal = false;
+	FColor custommodalcolor;
+	std::string custommodaltitle;
+	std::string custommodalbody;
+	std::vector<std::string> banCitations;
+	std::vector<std::string> modalbuttons;
 	bool freeplaycarcolors = false;
 	bool customcarcolorsrgb = false;
 	float primarycustomcarcolor[3];

@@ -1364,17 +1364,32 @@ namespace Hooks
 				}
 				Events.disabledscaleform = false;
 			}
+			if (!Events.UIConfig)
+			{
+				Events.UIConfig = Instances.GetInstanceOf<UUIConfig_TA>();
+
+				if (Events.UIConfig) {
+					Events.mainmenubackground = Events.UIConfig->MainMenuBG;
+				}
+			}
+
 			if (Events.needtochangemenubg) {
 				Events.needtochangemenubg = false;
-				UUIConfig_TA* uiconfig = Instances.GetInstanceOf<UUIConfig_TA>();
-				if (uiconfig) {
-					uiconfig->MainMenuBG = Events.mainmenubackground;
-					uiconfig->Apply();
-					uiconfig->__MainMenuBG__ChangeNotifyFunc();
-					UGFxShell_TA* gfxshell = Instances.GetInstanceOf<UGFxShell_TA>();
-					if (gfxshell)
-					{
-						gfxshell->ExitToMainMenu();
+
+				if (!Events.UIConfig)
+					Events.UIConfig = Instances.GetInstanceOf<UUIConfig_TA>();
+				if (Events.UIConfig) {
+					Events.UIConfig->MainMenuBG = Events.mainmenubackground;
+					Events.UIConfig->Apply();
+					Events.UIConfig->__MainMenuBG__ChangeNotifyFunc();
+
+					USeqEvent_MainMenuSwitched_TA* MainMenuSwitched = Instances.GetInstanceOf<USeqEvent_MainMenuSwitched_TA>();
+					if (!MainMenuSwitched)
+						MainMenuSwitched = Instances.CreateInstance<USeqEvent_MainMenuSwitched_TA>();
+
+					if (MainMenuSwitched) {
+						MainMenuSwitched->HandleMenuBGChange();
+						MainMenuSwitched->__SeqEvent_MainMenuSwitched_TA__RegisterEvent_0x2(Events.UIConfig);
 					}
 				}
 			}
@@ -1577,6 +1592,120 @@ namespace Hooks
 						if (UWallet_TA* wallet = onlinePlayer->Wallet)
 						{
 							wallet->GetWallet();
+						}
+					}
+				}
+			}
+
+			if (!Events.UIConfig)
+				Events.UIConfig = Instances.GetInstanceOf<UUIConfig_TA>();
+
+			if (Events.UIConfig->bCrateRouletteEnabled == false && Events.crateanimations == false) {
+				Events.UIConfig->bCrateRouletteEnabled = true;
+				Events.UIConfig->Apply();
+			}
+			if (Events.UIConfig->bCrateRouletteEnabled == true && Events.crateanimations == true) {
+				Events.UIConfig->bCrateRouletteEnabled = false;
+				Events.UIConfig->Apply();
+			}
+
+			if (Events.createmodalrn) {
+				Events.createmodalrn = false;
+
+				if (!Events.gfxshell)
+					Events.gfxshell = Instances.GetInstanceOf<UGFxShell_TA>();
+
+				if (Events.gfxshell)
+				{
+					if (Events.createdmodaltype == EModalType::Ban)
+					{
+						UGFxModal_Ban_TA* banModal = (UGFxModal_Ban_TA*)Events.gfxshell->CreateModal_NoShow(UGFxModal_Ban_TA::StaticClass());
+
+						if (banModal) {
+							for (std::string& button : Events.modalbuttons) {
+								FString label = Instances.to_fstring(button);
+
+								banModal->FlashAddButton(label);
+							}
+
+							FString title = Instances.to_fstring(Events.custommodaltitle);
+							FString body = Instances.to_fstring(Events.custommodalbody);
+							TArray<FString> BanCitations;
+
+							for (std::string& bancitation : Events.banCitations) {
+								FString citation = Instances.to_fstring(bancitation);
+
+								BanCitations.Add(citation);
+							}
+
+							FASColorTransform ColorTransform;
+
+							FLinearColor linearcolor = Events.gfxshell->ColorToLinearColor(Events.custommodalcolor);
+
+							ColorTransform.Multiply = linearcolor;
+
+							ColorTransform.Add = linearcolor;
+
+							if (banModal->GFxPopup)
+								banModal->SetCitations(BanCitations)->SetTitle(title)->SetBody(body)->GFxPopup->SetColorTransform(ColorTransform);
+
+							Events.gfxshell->ShowModalObject(banModal);
+						}
+					}
+					else if (Events.createdmodaltype == EModalType::Fun)
+					{
+						UGFxModal_X* Modal = Events.gfxshell->CreateModal_NoShow(UGFxModal_X::StaticClass());
+
+						if (Modal) {
+							for (std::string& button : Events.modalbuttons) {
+								FString label = Instances.to_fstring(button);
+
+								Modal->FlashAddButton(label);
+							}
+
+							FString title = Instances.to_fstring(Events.custommodaltitle);
+							FString body = Instances.to_fstring(Events.custommodalbody);
+
+							FASColorTransform ColorTransform;
+
+							FLinearColor linearcolor = Events.gfxshell->ColorToLinearColor(Events.custommodalcolor);
+
+							ColorTransform.Multiply = linearcolor;
+
+							ColorTransform.Add = linearcolor;
+
+							if (Modal->GFxPopup)
+								Modal->SetTitle(title)->SetBody(body)->GFxPopup->SetColorTransform(ColorTransform);
+
+							Events.gfxshell->ShowModalObject(Modal);
+						}
+					}
+					else if (Events.createdmodaltype == EModalType::Warning)
+					{
+						UGFxModal_Warning_TA* warnModal = (UGFxModal_Warning_TA*)Events.gfxshell->CreateModal_NoShow(UGFxModal_Warning_TA::StaticClass());
+
+						if (warnModal) {
+							for (std::string& button : Events.modalbuttons) {
+								FString label = Instances.to_fstring(button);
+
+								warnModal->FlashAddButton(label);
+							}
+
+							FString title = Instances.to_fstring(Events.custommodaltitle);
+							FString body = Instances.to_fstring(Events.custommodalbody);
+
+							FASColorTransform ColorTransform;
+
+							FLinearColor linearcolor = Events.gfxshell->ColorToLinearColor(Events.custommodalcolor);
+
+							ColorTransform.Multiply = linearcolor;
+
+							ColorTransform.Add = linearcolor;
+
+							if (warnModal->GFxPopup)
+								warnModal->SetTitle(title)->SetBody(body)->GFxPopup->SetColorTransform(ColorTransform);
+
+							Events.gfxshell->ShowModalObject(warnModal);
 						}
 					}
 				}
@@ -4438,6 +4567,7 @@ void EventsComponent::Initialize()
 				}
 			}
 		}
+
 		if (turntablemainmenu) {
 			Events.garageGFX = Instances.GetInstanceOf<UGFxData_Garage_TA>();
 			if (Events.garageGFX) {
