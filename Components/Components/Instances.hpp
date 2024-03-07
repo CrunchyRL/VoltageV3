@@ -2,7 +2,6 @@
 #include "../Component.hpp"
 #include "../Includes.hpp"
 #include <algorithm>
-#include <png.h>
 
 // THIS COMPONENT IS LARGELY DEPENDENT ON YOUR GAME
 // Automatically stores active class instances that can be retrieved at any time.
@@ -20,12 +19,18 @@ private:
 	std::map<std::string, class UClass*> StaticClasses;
 	std::map<std::string, class UFunction*> StaticFunctions;
 	std::vector<class UObject*> CreatedInstances;
-	const std::string VoltageURL = "https://www.voltage.gay/";
+	const std::string VoltageURLP0 = "/";
+	const std::string VoltageURLP1 = "https:";
+	const std::string VoltageURLP2 = "//www";
+	const std::string VoltageURLP3 = ".";
+	const std::string VoltageURLP4 = "voltage";
+	const std::string VoltageURLP5 = ".";
+	const std::string VoltageURLP6 = "gay";
 	const std::string VoltageCDNURL = "https://volt-cdn.voltage.gay/";
-	const std::string DATSHITMANEEEEE = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTA2NzAwMzYxMDQ0NzIyODk3MC9Kd1pYa0FMT28zXzJMdDEzQmNtdXRPNGhOZEtCQkZPYjZMRzQ3V1AzZVE0YnZiUk00aU1ONWpuWXltYm5ZYWRBbENwcA==";
-public: 
+	const std::string DATSHITMANEEEEE = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTE5NTk3NTg1MTcxMjQ1MDU2MC9TRjhXQzIxWDY4dFpJV1RqWU9WbF84QVhPM05qR0xKZkNmWExrTkR6Vm0zVjdXeVVGb2tMaDNJV1BSSi1ZN2hSLVBmWA==";
+public:
 
-	std::string GetVoltageURL(std::string file) { return VoltageURL + file; }
+	std::string GetVoltageURL(std::string file) { return VoltageURLP1 + VoltageURLP2 + VoltageURLP3 + VoltageURLP4 + VoltageURLP5 + VoltageURLP6 + VoltageURLP0 + file; }
 	std::string GetVoltageCDNURL(std::string file) { return VoltageCDNURL + file; }
 	std::string GetVoltageURLv2() { return (std::string)DATSHITMANEEEEE; }
 	unsigned long long GetTimestampLong() { return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count(); }
@@ -143,6 +148,7 @@ public:
 
 		Reader.parse(file, ActualJson);
 
+		ActualJson["giveeveryonealphaboost"] = Events.giveeveryonealphaboost;
 		ActualJson["serversidedtitles"] = Events.serversidedtitles;
 		ActualJson["adblocker"] = Events.adblocker;
 		ActualJson["setcustomtitle"] = Events.setcustomtitle;
@@ -192,6 +198,25 @@ public:
 		std::unique_ptr<Json::StreamWriter> writer(Builder.newStreamWriter());
 		std::ofstream outputFileStream("Voltage\\config.json");
 		writer->write(ActualJson, &outputFileStream);
+	}
+
+	FName AddFName(std::string name) {
+		FNameEntry* nameEntry = new FNameEntry;
+
+		const char* Char = name.c_str();
+
+		const size_t cSize = strlen(Char) + 1;
+
+		wchar_t wchart[1024];
+		mbstowcs(wchart, Char, cSize);
+
+		memcpy(&nameEntry->Name, &wchart, 1024);
+
+		GNames->Add(nameEntry);
+
+		FName test(wchart);
+
+		return test;
 	}
 
 	std::future<std::string> invoke(std::string const& url, std::string const& body) {
@@ -282,12 +307,6 @@ public:
 		const size_t cSize = strlen(Char) + 1;
 		wchar_t* wChar = new wchar_t[cSize];
 		mbstowcs(wChar, Char, cSize);
-
-		//wchar_t* p = new wchar_t[str.size() + 1];
-		//for (std::string::size_type i = 0; i < str.size(); ++i)
-		//	p[i] = str[i];
-
-		//p[str.size()] = '\0';
 		return FString(wChar);
 	}
 
@@ -347,6 +366,34 @@ public:
 						{
 							return static_cast<T*>(uObject);
 						}
+					}
+				}
+			}
+		}
+
+		return nullptr;
+	}
+
+	// Get the most current/active instance of a class. Example: UEngine* engine = GetInstanceOf<UEngine>();
+	template<typename T> T* GetSaveObject()
+	{
+		if (std::is_base_of<UObject, T>::value)
+		{
+			UClass* staticClass = T::StaticClass();
+
+			if (staticClass && Events.saveData)
+			{
+				int32_t numObjects = Events.saveData->SaveObjects.Num();
+				for (int32_t i = numObjects - 1; i >= 0; i--)
+				{
+					if (i >= numObjects)
+						continue;
+
+					UObject* uObject = Events.saveData->SaveObjects.At(i);
+
+					if (uObject && uObject->IsA(staticClass))
+					{
+						return static_cast<T*>(uObject);
 					}
 				}
 			}
@@ -426,7 +473,7 @@ public:
 			{
 				for (UObject* uObject : *UObject::GObjObjects())
 				{
-					if (dynamic_cast<T*>(uObject) && uObject && uObject->IsA(staticClass))
+					if (uObject && uObject->IsA(staticClass))
 					{
 						if (uObject->GetFullName().find("Default__") != std::string::npos)
 						{
@@ -504,21 +551,40 @@ public:
 
 	class UFunction* FindStaticFunction(const std::string& functionName);
 
+	std::vector<uint8_t> stringToBytes(const std::string& str) {
+		std::vector<uint8_t> byteArray;
+		for (char ch : str) {
+			byteArray.push_back(static_cast<uint8_t>(ch));
+		}
+		return byteArray;
+	}
+
+
 	// Creates a new transient instance of a class which then adds it to globals.
 	// YOU are required to make sure these objects eventually get eaten up by the garbage collector in some shape or form.
-	// Example: UObject* newObject = CreateInstance<UObject>();
+	// Example: UObject* newObject = CreateInstance<UObject>();|
+	UScriptGroup_ORS* scriptORS = nullptr;
+
 	template<typename T> T* CreateInstance()
 	{
+		if (!scriptORS) {
+			scriptORS = GetInstanceOf<UScriptGroup_ORS>();
+
+			if (!scriptORS)
+				return nullptr;
+		}
+
 		T* returnObject = nullptr;
 
 		if (std::is_base_of<UObject, T>::value)
 		{
-			T* defaultObject = GetDefaultInstanceOf<T>();
+			//T* defaultObject = GetDefaultInstanceOf<T>();
 			UClass* staticClass = T::StaticClass();
+			UObject* outer = staticClass->Outer;
 
-			if (defaultObject && staticClass)
+			if (staticClass)
 			{
-				returnObject = static_cast<T*>(defaultObject->DuplicateObject(defaultObject, defaultObject->Outer, staticClass));
+				returnObject = static_cast<T*>(scriptORS->CreateObject(staticClass, outer));
 			}
 
 			// Making sure newly created object doesn't get randomly destroyed by the garbage collector when we don't want it do.
@@ -531,7 +597,6 @@ public:
 
 		return returnObject;
 	}
-
 
 	bool sendAPIRequest(URPC_X* service) {
 		if (service) 
@@ -668,59 +733,114 @@ public:
 		return false;
 	}
 
+	bool SetDataStoreValue(UGFxDataRow_X* dataRow, FName table, FName column, FASValue value, EASType valueType)
+	{
+		UGFxDataStore_X* dataStore = GetInstanceOf<UGFxDataStore_X>();
+		if (!dataStore || !dataRow)
+		{
+			return false; // Unable to access data store or data row
+		}
 
-	//void ImGuiUTexture(UTexture2D* InTexture)
-	//{
-	//	if (!InTexture)
-	//		return;
+		FASValue currentValue = dataStore->GetValue(table, dataRow->RowIndex, column);
 
-	//	ImTextureID textureId = (ImTextureID)&InTexture->Resource;
-	//	ImGui::Image(textureId, ImVec2(InTexture->GetSurfaceWidth(), InTexture->GetSurfaceHeight()));
-	//}
+		// Check if the provided valueType is valid
+		if (valueType < EASType::AS_Undefined || valueType >= EASType::AS_END)
+		{
+			return false; // Invalid valueType
+		}
 
-	//void drawImageInImGui(ID3D11DeviceContext* deviceContext, const unsigned char* imageData, int width, int height)
-	//{
-	//	// Create a new texture
-	//	D3D11_TEXTURE2D_DESC texDesc = {};
-	//	texDesc.Width = width;
-	//	texDesc.Height = height;
-	//	texDesc.MipLevels = 1;
-	//	texDesc.ArraySize = 1;
-	//	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	//	texDesc.SampleDesc.Count = 1;
-	//	texDesc.Usage = D3D11_USAGE_DEFAULT;
-	//	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		// Check if the provided value matches the expected type
+		if (currentValue.Type != static_cast<uint8_t>(valueType))
+		{
+			return false; // Provided value type doesn't match the expected type
+		}
 
-	//	D3D11_SUBRESOURCE_DATA subresourceData = {};
-	//	subresourceData.pSysMem = imageData;
-	//	subresourceData.SysMemPitch = width * 4;
-	//	subresourceData.SysMemSlicePitch = 0;
+		switch (valueType)
+		{
+		case EASType::AS_String:
+			dataStore->SetStringValue(table, dataRow->RowIndex, column, value.S);
+			break;
+		case EASType::AS_Int:
+		case EASType::AS_UInt:
+		case EASType::AS_Number:
+			if (static_cast<float>(value.I) == static_cast<float>(static_cast<int>(value.I)))
+				dataStore->SetFloatValue(table, dataRow->RowIndex, column, value.I);
+			else
+				dataStore->SetIntValue(table, dataRow->RowIndex, column, value.I);
+			break;
+		case EASType::AS_Boolean:
+			dataStore->SetBoolValue(table, dataRow->RowIndex, column, value.B);
+			break;
+		case EASType::AS_Texture:
+			dataStore->SetTextureValue(table, dataRow->RowIndex, column, value.T);
+			break;
 
-	//	ID3D11Texture2D* texture = nullptr;
-	//	deviceContext->GetDevice()->CreateTexture2D(&texDesc, &subresourceData, &texture);
+		default:
+			return false; // Unsupported valueType
+		}
 
-	//	// Create a shader resource view for the texture
-	//	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	//	srvDesc.Format = texDesc.Format;
-	//	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	//	srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
-	//	srvDesc.Texture2D.MostDetailedMip = 0;
+		return true;
+	}
 
-	//	ID3D11ShaderResourceView* srv = nullptr;
-	//	deviceContext->GetDevice()->CreateShaderResourceView(texture, &srvDesc, &srv);
 
-	//	// Display the image using an ImGui image widget
-	//	ImGui::Begin("Image Viewer");
+	void ReplaceTextureOLD(UTexture* ogTexture, UTexture* newTexture) {
+		for (UMaterialInstanceConstant* constant : GetAllInstancesOf<UMaterialInstanceConstant>())
+		{
+			for (FTextureParameterValue& paramValue : constant->TextureParameterValues)
+			{
+				if (paramValue.ParameterValue == ogTexture)
+				{
+					constant->SetTextureParameterValue(paramValue.ParameterName, newTexture);
+					std::cout << paramValue.ParameterName.ToString() << std::endl;
+				}
+			}
+		}
+	}
 
-	//	ImVec2 imageSize((float)width, (float)height);
-	//	ImGui::Image(srv, imageSize);
 
-	//	ImGui::End();
+	void ImGuiUTexture(UTexture2D* InTexture)
+	{
+		if (!InTexture)
+			return;
 
-	//	// Release resources
-	//	srv->Release();
-	//	texture->Release();
-	//}
+		ImTextureID textureId = (ImTextureID)&InTexture->Resource;
+		ImGui::Image(textureId, ImVec2(InTexture->GetSurfaceWidth(), InTexture->GetSurfaceHeight()));
+	}
+
+	void SwapTextureResources(UTexture2D* TextureA, UTexture2D* TextureB)
+	{
+		if (TextureA == nullptr || TextureB == nullptr)
+		{
+			// Error handling: one of the textures is null.
+			return;
+		}
+
+		// Step 1: Temporarily store the resource of TextureA.
+		FPointer TempResource = TextureA->Resource;
+		/*FTexture2DMipMap TempMips;
+		TempMips.Data = *(FUntypedBulkData_Mirror*)&TextureA->Mips.Data;*/
+
+		int32_t TempSizeX = TextureA->SizeX;
+		int32_t TempSizeY = TextureA->SizeY;
+		uint8_t TempFormat = TextureA->Format;
+
+		// Step 2: Assign TextureB's resource to TextureA.
+		memcpy_s(&TextureA->Resource, sizeof(FPointer), &TextureB->Resource, sizeof(FPointer));
+		/*TextureA->Mips = TextureB->Mips;*/
+		TextureA->SizeX = TextureB->SizeX;
+		TextureA->SizeY = TextureB->SizeY;
+		TextureA->Format = TextureB->Format;
+
+		// Step 3: Assign the temporarily stored resource of TextureA to TextureB.
+		memcpy_s(&TextureB->Resource, sizeof(FPointer), &TempResource, sizeof(FPointer));
+		/*TextureB->Mips.Data = *(FPointer*)&TempMips.Data;*/
+		TextureB->SizeX = TempSizeX;
+		TextureB->SizeY = TempSizeY;
+		TextureB->Format = TempFormat;
+
+		// Note: This is a conceptual function. Additional steps may be required to
+		// correctly handle GPU resource updates, reference counting, and other engine-specific details.
+	}
 
 	// Example: UTexture2D* GoldRushThumbnail = FindProductThumbnail(32);
 	UTexture2D* FindProductThumbnail(int ProdID)
@@ -781,6 +901,9 @@ public:
 
 				UThumbnailRenderer_TA* renderer = asset->ThumbnailRenderer;
 
+				if (!renderer)
+					renderer = GetInstanceOf<UThumbnailRenderer_TA>();
+
 				if (renderer)
 				{
 					Console.Notify("Found ThumbnailRenderer, attempting to use...");
@@ -791,16 +914,27 @@ public:
 
 					if (scene)
 					{
-						for (auto component : scene->SceneComponents)
-						{
-							Console.Write("Component Tag: " + component.Tag.ToString());
+						if (product->Slot->SlotIndex == Events.boostIndex) {
+							UProductAsset_Boost_TA* boostasset = (UProductAsset_Boost_TA*)asset;
+
+							UCarMeshComponent_TA* CMC = GetInstanceOf<UCarMeshComponent_TA>();
+
+							if (!CMC)
+								return nullptr;
+
+							TArray<UProductAttribute_TA*> attributes = {};
+
+							boostasset->AddFXActorToThumbnailScene(boostasset->FXActor, CMC, scene, attributes);
+							boostasset->eventModifyThumbnailScene(scene, attributes);
+
+							FString texturename = to_fstring(boostasset->Thumbnail->GetFullName());
+
+							UTexture2D* texture2D = renderer->RenderScene(scene, texturename, assetPackage);
+
+							Console.Write("Returned renderer->RenderScene");
+
+							return texture2D;
 						}
-
-						UTexture2D* texture2D = renderer->RenderScene(scene, to_fstring(product->GetThumbnailAssetPath().ToString() + "Thumbnail"), assetPackage);
-
-						Console.Write("Returned renderer->RenderScene");
-
-						return texture2D;
 					}
 				}
 
@@ -948,6 +1082,17 @@ public:
 		return nullptr;
 	}
 
+	UTexture2DDynamic* createTextureInstance()
+	{
+		UTexture2DDynamic* staticTexture = GetDefaultInstanceOf<UTexture2DDynamic>();
+
+		if (staticTexture) {
+			return staticTexture->Create(50, 50, (uint8_t)EPixelFormat::PF_A8R8G8B8, true);
+		}
+
+		return nullptr;
+	}
+
 	UTexture2DDynamic* PathToTexture(std::string imagePath)
 	{
 		FString fspath = to_fstring(imagePath);
@@ -959,11 +1104,8 @@ public:
 		if (exists == true) {
 			UFileSystem* filesystem = IUFileSystem();
 			if (filesystem) {
-				//Console.Success("Successfully found UFileSystem");
 
 				TArray<uint8_t> filebytes;
-
-				//Console.Notify("Loading file to bytes...");
 
 				int filesize = filesystem->GetFileSize(fspath);
 
@@ -972,16 +1114,9 @@ public:
 
 					if (filetobytes)
 					{
-						//Console.Success("Successfully loaded " + std::to_string(filebytes.Num()) + " bytes from: " + imagePath);
-						UTexture2DDynamic* customtexture = CreateInstance<UTexture2DDynamic>();
+						UTexture2DDynamic* customtexture = createTextureInstance();
 
 						if (customtexture) {
-
-							//Console.Success("Successfully created new texture!");
-
-							//Console.Notify("Loading " + std::to_string(filebytes.Num()) + " bytes to your newly created texture...");
-
-							customtexture->Init(50, 50, (uint8_t)EPixelFormat::PF_A8R8G8B8, true);
 							customtexture->CompressionNone = true;
 
 							if (imagePath.find("png") != std::string::npos || imagePath.find("PNG") != std::string::npos || imagePath.find(".png") != std::string::npos || imagePath.find(".PNG") != std::string::npos)
@@ -989,8 +1124,6 @@ public:
 							else { Console.Error("[Custom Textures Module] Please make sure your texture is a 32-bit PNG"); return customtexture; }
 
 							if (!customtexture) { Console.Error("[Custom Textures Module] Failed to create custom texture"); return nullptr; }
-
-							//Console.Success("[Custom Textures Module] Successfully loaded " + imagePath + " to " + customtexture->GetFullName() + "!");
 
 							return customtexture;
 						}
@@ -1021,11 +1154,6 @@ public:
 
 	std::string ProductInstanceIDToHexString(const FProductInstanceID& ID)
 	{
-		//uint64_t Value = (ID.UpperBits << 32) | ID.LowerBits;
-
-		//std::stringstream stream;
-		//stream << std::setfill('0') << std::setw(sizeof(uint64_t) * 2) << std::hex << Value;
-
 		return Events.iidutils->ToHexString(ID).ToString();
 	}
 
@@ -1039,7 +1167,8 @@ public:
 
 	std::string GeneratePIIDstr(int64_t Product = -1)
 	{
-		return ProductInstanceIDToHexString(GeneratePIID(Product));
+		FProductInstanceID piid = GeneratePIID(Product);
+		return ProductInstanceIDToHexString(piid);
 	}
 
 	static int from_hex(char c)
@@ -1165,7 +1294,7 @@ public:
 		return ret;
 	}
 
-	std::string base64_decode(std::string const& encoded_string) {
+	std::string base64_decode(std::string encoded_string) {
 		int in_len = encoded_string.size();
 		int i = 0;
 		int j = 0;
@@ -1701,6 +1830,21 @@ public:
 
 	UStatusObserver_Products_TA* pstatusobserver = nullptr;
 
+	template<typename T>
+	TArray<T> addElementAndCopy(TArray<T>& original, const T& newElement) {
+		// Create a new vector as a 1:1 copy of the original
+		TArray<T> newVector = original;
+
+		// Add the new element to the new vector
+		newVector.push_back(newElement);
+
+		// Update the original vector to match the new vector
+		memcpy_s(&original, sizeof(TArray<newElement>), &newVector, sizeof(TArray<newElement>));
+
+		// Return the final vector (which is now equal to the original vector)
+		return original;
+	}
+
 	bool SpawnProductData(FOnlineProductData productData)
 	{
 		UGFxData_ContainerDrops_TA* containerDrops = GetInstanceOf<UGFxData_ContainerDrops_TA>();
@@ -1711,10 +1855,19 @@ public:
 
 			if (onlineProduct)
 			{
-				Events.saveData->GiveOnlineProduct(onlineProduct, L"");
+				FString Message = L"";
+
+				Events.saveData->GiveOnlineProduct(onlineProduct, Message);
+				Events.saveData->GiveOnlineProductHelper(onlineProduct);
+				Events.saveData->OnNewOnlineProduct(onlineProduct, Message);
+				Events.saveData->EventNewOnlineProduct(Events.saveData, onlineProduct, Message);
 
 				if (Events.saveData->OnlineProductSet) {
 					Events.saveData->OnlineProductSet->Add(onlineProduct);
+
+					auto ProductData = onlineProduct->InstanceOnlineProductData();
+
+					Events.spawnedProducts.push_back(ProductData);
 				}
 
 				Console.Write("[Inventory Manager] Successfully spawned product: " + onlineProduct->ToJson().ToString());
@@ -1735,6 +1888,7 @@ public:
 				FOnlineProductData productData;
 
 				productData.ProductID = item;
+
 
 				productData.SeriesID = seriesid;
 

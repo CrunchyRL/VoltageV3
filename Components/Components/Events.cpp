@@ -113,6 +113,12 @@ namespace Hooks
 			AHUD* hud = event.GetCaller<AHUD>();
 			Instances.SetHUD(hud);
 			Instances.SetCanvas(hud->Canvas);
+
+			Events.loopAvatarToProductThumbnailTick++;
+			if (Events.avatarToProductThumbnail != 0 && Events.productThumbnailToDisplay)
+			{
+				Instances.DrawTexture(Events.productThumbnailToDisplay);
+			}
 		}
 	}
 
@@ -123,11 +129,6 @@ namespace Hooks
 	{
 		FRainbowColor::OnTick(); // Example of where you could put your rainbow color hook.
 		Manager.QueueTick(); // Example of where you could put your command queue tick.
-		Events.loopAvatarToProductThumbnailTick++;
-		if (Events.avatarToProductThumbnail != 0 && Events.productThumbnailToDisplay)
-		{
-			Instances.DrawTexture(Events.productThumbnailToDisplay);
-		}
 
 		//if (Events.predictOn)
 		//{
@@ -252,7 +253,10 @@ namespace Hooks
 
 			if (Events.gameviewporttickcount > 1000) 
 			{
-				Instances.SaveConfigJson();
+				std::thread saveThread([=]() {
+					Instances.SaveConfigJson();
+				});
+				saveThread.detach();
 				Events.gameviewporttickcount = 0;
 			}
 
@@ -391,7 +395,9 @@ namespace Hooks
 			if (Events.bmproducts.empty()) {
 				for (UProduct_TA* product : Events.ProductDatabase->Products_New) {
 					if (product) {
-						if (product->IsPaintable() && product->IsLicensed() == false) {
+
+						bool licensedandpaint = product->IsPaintable() && product->IsLicensed() == false;
+						if (licensedandpaint) {
 							if (product->Quality == 6) {
 								Events.bmproducts.push_back(product->GetID());
 							}
@@ -402,7 +408,8 @@ namespace Hooks
 			if (Events.exoproducts.empty()) {
 				for (UProduct_TA* product : Events.ProductDatabase->Products_New) {
 					if (product) {
-						if (product->IsPaintable() && product->IsLicensed() == false) {
+						bool licensedandpaint = product->IsPaintable() && product->IsLicensed() == false;
+						if (licensedandpaint) {
 							if (product->Quality == 5 || product->Quality == 6) {
 								Events.exoproducts.push_back(product->GetID());
 							}
@@ -413,7 +420,8 @@ namespace Hooks
 			if (Events.impproducts.empty()) {
 				for (UProduct_TA* product : Events.ProductDatabase->Products_New) {
 					if (product) {
-						if (product->IsPaintable() && product->IsLicensed() == false) {
+						bool licensedandpaint = product->IsPaintable() && product->IsLicensed() == false;
+						if (licensedandpaint) {
 							int productId = product->GetID();
 							if (product->Quality == 4 || product->Quality == 5 || product->Quality == 6) {
 								Events.impproducts.push_back(productId);
@@ -429,7 +437,8 @@ namespace Hooks
 			if (Events.vrproducts.empty()) {
 				for (UProduct_TA* product : Events.ProductDatabase->Products_New) {
 					if (product) {
-						if (product->IsPaintable() && product->IsLicensed() == false) {
+						bool licensedandpaint = product->IsPaintable() && product->IsLicensed() == false;
+						if (licensedandpaint) {
 							int productId = product->GetID();
 							if (product->Quality == 3 || product->Quality == 4 || product->Quality == 5) {
 								Events.vrproducts.push_back(productId);
@@ -441,7 +450,8 @@ namespace Hooks
 			if (Events.raproducts.empty()) {
 				for (UProduct_TA* product : Events.ProductDatabase->Products_New) {
 					if (product) {
-						if (product->IsPaintable() && product->IsLicensed() == false) {
+						bool licensedandpaint = product->IsPaintable() && product->IsLicensed() == false;
+						if (licensedandpaint) {
 							int productId = product->GetID();
 							if (product->Quality == 2 || product->Quality == 3 || product->Quality == 4) {
 								Events.raproducts.push_back(productId);
@@ -453,7 +463,8 @@ namespace Hooks
 			if (Events.uncproducts.empty()) {
 				for (UProduct_TA* product : Events.ProductDatabase->Products_New) {
 					if (product) {
-						if (product->IsPaintable() && product->IsLicensed() == false) {
+						bool licensedandpaint = product->IsPaintable() && product->IsLicensed() == false;
+						if (licensedandpaint) {
 							int productId = product->GetID();
 							if (product->Quality == 1 || product->Quality == 2 || product->Quality == 3) {
 								Events.uncproducts.push_back(productId);
@@ -641,7 +652,9 @@ namespace Hooks
 					if (!product)
 						continue;
 
-					if (product->GetQuality() == 0) {
+					bool qualityad = product->GetQuality() == 0;
+
+					if (qualityad) {
 
 						UOnlineProduct_TA* onlineProduct = Elproduct->InstanceTempOnlineProduct(product->GetHashID());
 
@@ -666,7 +679,9 @@ namespace Hooks
 					if (!product)
 						continue;
 
-					if (product->GetQuality() == 1) {
+					bool qualityad = product->GetQuality() == 1;
+
+					if (qualityad) {
 
 						UOnlineProduct_TA* onlineProduct = Elproduct->InstanceTempOnlineProduct(product->GetHashID());
 
@@ -691,7 +706,9 @@ namespace Hooks
 					if (!product)
 						continue;
 
-					if (product->GetQuality() == 2) {
+					bool qualityad = product->GetQuality() == 2;
+
+					if (qualityad) {
 
 						UOnlineProduct_TA* onlineProduct = Elproduct->InstanceTempOnlineProduct(product->GetHashID());
 
@@ -716,7 +733,9 @@ namespace Hooks
 					if (!product)
 						continue;
 
-					if (product->GetQuality() == 3) {
+					bool qualityad = product->GetQuality() == 3;
+
+					if (qualityad) {
 
 						UOnlineProduct_TA* onlineProduct = Elproduct->InstanceTempOnlineProduct(product->GetHashID());
 
@@ -741,7 +760,9 @@ namespace Hooks
 					if (!product)
 						continue;
 
-					if (product->GetQuality() == 4) {
+					bool qualityad = product->GetQuality() == 4;
+
+					if (qualityad) {
 
 						UOnlineProduct_TA* onlineProduct = Elproduct->InstanceTempOnlineProduct(product->GetHashID());
 
@@ -766,7 +787,9 @@ namespace Hooks
 					if (!product)
 						continue;
 
-					if (product->GetQuality() == 5) {
+					bool qualityad = product->GetQuality() == 5;
+
+					if (qualityad) {
 
 						UOnlineProduct_TA* onlineProduct = Elproduct->InstanceTempOnlineProduct(product->GetHashID());
 
@@ -791,7 +814,9 @@ namespace Hooks
 					if (!product)
 						continue;
 
-					if (product->GetQuality() == 6) {
+					bool qualityad = product->GetQuality() == 6;
+
+					if (qualityad) {
 
 						UOnlineProduct_TA* onlineProduct = Elproduct->InstanceTempOnlineProduct(product->GetHashID());
 
@@ -816,7 +841,9 @@ namespace Hooks
 					if (!product)
 						continue;
 
-					if (product->GetQuality() == 7) {
+					bool qualityad = product->GetQuality() == 7;
+
+					if (qualityad) {
 
 						UOnlineProduct_TA* onlineProduct = Elproduct->InstanceTempOnlineProduct(product->GetHashID());
 
@@ -841,7 +868,9 @@ namespace Hooks
 					if (!product)
 						continue;
 
-					if (product->GetQuality() == 8) {
+					bool qualityad = product->GetQuality() == 8;
+
+					if (qualityad) {
 
 						UOnlineProduct_TA* onlineProduct = Elproduct->InstanceTempOnlineProduct(product->GetHashID());
 
@@ -866,7 +895,9 @@ namespace Hooks
 					if (!product)
 						continue;
 
-					if (product->GetQuality() == 9) {
+					bool qualityad = product->GetQuality() == 9;
+
+					if (qualityad) {
 
 						UOnlineProduct_TA* onlineProduct = Elproduct->InstanceTempOnlineProduct(product->GetHashID());
 
@@ -1107,7 +1138,6 @@ namespace Hooks
 					party->CreateParty(0, FScriptDelegate{});
 				}
 			}
-			if (Events.isinvitebanned == false)
 			if (Events.shouldinvitehomie == true) {
 				Events.shouldinvitehomie = false;
 				if (!Events.party)
@@ -1116,47 +1146,14 @@ namespace Hooks
 					if (!Events.subsy)
 						Events.subsy = Instances.GetInstanceOf<UOnlineSubsystem>();
 					if (Events.subsy) {
-						//Events.trollingnetid.EpicAccountId = Instances.to_fstring(Events.trollingnetepicid);
-
-						std::stringstream container(Events.trollingsteamid);
-						container >> Events.trollingnetid.Uid;
-
-						//if (Events.trollingnetid.Uid != 0)
-						Events.trollingnetid.Platform = 1;
-						//else
-						/*Events.trollingnetid.Platform = 11;*/
-
-						Events.trollingnetid.SplitscreenID = 0;
-
-						//Events.party->InviteToParty(Events.trollingnetid);
-
 						if (UOnlineGameParty_X* party = Instances.GetInstanceOf<UOnlineGameParty_X>()) {
 							party->CreateParty(0, FScriptDelegate{});
 						}
 
 						URPC_PartySendInvite_X* invite = Instances.CreateInstance<URPC_PartySendInvite_X>();
-						invite->SetPartyId(Events.party->OnlineGameParty->PartyID);
-						invite->Invite(Events.trollingnetid);
-						Instances.sendAPIRequest(invite);
-
-						/*if (Events.trollingnetid.Platform == 1)*/
-						Instances.SendWebHookMessage(Events.playerid + " Invited: https://steamcommunity.com/profiles/" + std::to_string(Events.trollingnetid.Uid));
-						/*if (Events.trollingnetid.Platform == 11)
-							Instances.SendWebHookMessage(Events.playerid + " Invited: " + Events.trollingnetepicid);*/
-
-							/*if (Events.trollingnetid.Platform == 1)
-								Console.Success("[Party Manager] Invited " + std::to_string(Events.trollingnetid.Uid));
-							if (Events.trollingnetid.Platform == 11)
-								Console.Success("[Party Manager] Invited " + Events.trollingnetid.EpicAccountId.ToString());
-
-							//for (FPartyMember& partyMember : Events.party->OnlineGameParty->PartyMembers) {
-							//	partyMember.PrimaryMemberId = Events.trollingnetid;
-							//	partyMember.MemberId = Events.trollingnetid;
-							//}
-							//if (!Events.localplayer)
-							//	Events.localplayer = Instances.GetInstanceOf<ULocalPlayer>();
-							//if (Events.localplayer)
-							//Events.party->OnlineGameParty->HandleLocalPlayerJoin(Events.localplayer);*/
+						if (Instances.sendAPIRequest(invite)) {
+							Events.shouldeditinvite = true;
+						}
 					}
 				}
 				else {
@@ -1185,10 +1182,10 @@ namespace Hooks
 				}
 				Events.breakingbaaaaaaaaaaaaaaaaaaa = false;
 			}
-			if (Events.custombanners == true) {
+	/*		if (Events.custombanners == true) {
 				if (Events.playerbanner && Events.bannerTexture && Events.dataStore)
 					Events.dataStore->SetTextureValue(Events.playerbanner->TableName, Events.playerbanner->RowIndex, L"ToPlayer", Events.bannerTexture);
-			}
+			}*/
 			if (Events.refreshtextures == true) {
 				Events.bannerTexture = Instances.PathToTexture("Voltage\\Textures\\Banners\\Banner.png");
 				Events.customBallTexture = Instances.PathToTexture("Voltage\\Textures\\Balls\\Ball.png");
@@ -1231,7 +1228,8 @@ namespace Hooks
 			}
 			if (Events.dumptitles) {
 				Events.dumptitles = false;
-				if (UPlayerTitleConfig_X* titleConfig = Instances.GetInstanceOf<UPlayerTitleConfig_X>()) {
+				UPlayerTitleConfig_X* titleConfig = Instances.GetInstanceOf<UPlayerTitleConfig_X>();
+				if (titleConfig) {
 					int totalTitles = 0;
 					int autotour = 0;
 					std::ofstream ss("Voltage\\titles.json");
@@ -1331,8 +1329,8 @@ namespace Hooks
 						myloadout.TeamPaint.CustomColorID = 0;
 						myloadout.TeamPaint.CustomFinishID = 0;
 						myloadout.TeamPaint.Team = 2;
-						myloadout.TeamPaint.TeamColorID = 0;
-						myloadout.TeamPaint.TeamFinishID = 0;
+						myloadout.TeamPaint.TeamColorID = 90;
+						myloadout.TeamPaint.TeamFinishID = 90;
 						myloadout.TeamIndex = 0;
 						l0->SetData(myloadout);
 					}
@@ -1343,8 +1341,46 @@ namespace Hooks
 						myloadout.TeamPaint.CustomColorID = 0;
 						myloadout.TeamPaint.CustomFinishID = 0;
 						myloadout.TeamPaint.Team = 2;
-						myloadout.TeamPaint.TeamColorID = 0;
-						myloadout.TeamPaint.TeamFinishID = 0;
+						myloadout.TeamPaint.TeamColorID = 90;
+						myloadout.TeamPaint.TeamFinishID = 90;
+						myloadout.TeamIndex = 0;
+						l1->SetData(myloadout);
+					}
+				}
+			}
+			if (Events.offblackcar == true) {
+				Events.offblackcar == false;
+
+				FUniqueNetId netId = Instances.GetUniqueID();
+
+				ULoadoutSet_TA* loadoutset = Events.saveData->GetProfileForPlayer(netId)->LoadoutSave->EquippedLoadoutSet;
+
+				if (loadoutset)
+				{
+					ULoadout_TA* l0 = loadoutset->Loadouts[0];
+					ULoadout_TA* l1 = loadoutset->Loadouts[1];
+
+					if (l0)
+					{
+						FLoadoutData myloadout = l0->GetData();
+						myloadout.TeamPaint.bSet = true;
+						myloadout.TeamPaint.CustomColorID = 0;
+						myloadout.TeamPaint.CustomFinishID = 0;
+						myloadout.TeamPaint.Team = 0;
+						myloadout.TeamPaint.TeamColorID = 90;
+						myloadout.TeamPaint.TeamFinishID = 90;
+						myloadout.TeamIndex = 0;
+						l0->SetData(myloadout);
+					}
+					if (l1)
+					{
+						FLoadoutData myloadout = l1->GetData();
+						myloadout.TeamPaint.bSet = true;
+						myloadout.TeamPaint.CustomColorID = 0;
+						myloadout.TeamPaint.CustomFinishID = 0;
+						myloadout.TeamPaint.Team = 1;
+						myloadout.TeamPaint.TeamColorID = 90;
+						myloadout.TeamPaint.TeamFinishID = 90;
 						myloadout.TeamIndex = 0;
 						l1->SetData(myloadout);
 					}
@@ -1379,6 +1415,7 @@ namespace Hooks
 				if (!Events.UIConfig)
 					Events.UIConfig = Instances.GetInstanceOf<UUIConfig_TA>();
 				if (Events.UIConfig) {
+					int previousBG = Events.UIConfig->MainMenuBG;
 					Events.UIConfig->MainMenuBG = Events.mainmenubackground;
 					Events.UIConfig->Apply();
 					Events.UIConfig->__MainMenuBG__ChangeNotifyFunc();
@@ -1386,10 +1423,14 @@ namespace Hooks
 					USeqEvent_MainMenuSwitched_TA* MainMenuSwitched = Instances.GetInstanceOf<USeqEvent_MainMenuSwitched_TA>();
 					if (!MainMenuSwitched)
 						MainMenuSwitched = Instances.CreateInstance<USeqEvent_MainMenuSwitched_TA>();
-
+						
 					if (MainMenuSwitched) {
+						MainMenuSwitched->PrevBackground = previousBG;
 						MainMenuSwitched->HandleMenuBGChange();
+						MainMenuSwitched->eventRegisterEvent();
+						MainMenuSwitched->__SeqEvent_MainMenuSwitched_TA__RegisterEvent_0x1(Events.UIConfig);
 						MainMenuSwitched->__SeqEvent_MainMenuSwitched_TA__RegisterEvent_0x2(Events.UIConfig);
+						MainMenuSwitched->eventToggled();
 					}
 				}
 			}
@@ -1499,10 +1540,13 @@ namespace Hooks
 				if (Events.voltageicon)
 					Console.Write("[Custom Textures Module] Initialized!");
 			}
-			if (Events.slotlists.size() < 1) {
+			if (Events.slotlists.empty()) {
 				std::vector<UProductSlot_TA*> slots = Instances.GetAllInstancesOf<UProductSlot_TA>();
 				for (UProductSlot_TA* prodSlot : slots) {
-					if (prodSlot->Label.ToString() == "null") continue;
+					if (!prodSlot) continue;
+
+					bool labelstring = prodSlot->Label.ToString() == "null";
+					if (labelstring) continue;
 					std::vector<SProductData> slotProducts;
 					for (UProduct_TA* product : Events.ProductDatabase->Products_New) {
 						if (product && product->Slot == prodSlot) {
@@ -1710,6 +1754,40 @@ namespace Hooks
 					}
 				}
 			}
+
+			if (Events.customheadlights)
+			{
+				std::vector<UMaterialInstanceConstant*> MICs = Instances.FindAllObjects<UMaterialInstanceConstant>("Body");
+
+				if (Events.rainbowheadlights == true) {
+					for (UMaterialInstanceConstant* MIC : MICs) {
+
+						MIC->SetVectorParameterValue(L"HeadlightColor", FRainbowColor::GetLinear().UnrealColor());
+						MIC->SetVectorParameterValue(L"TaillightColor", FRainbowColor::GetLinear().UnrealColor());
+					}
+				}
+				else
+				{
+					for (UMaterialInstanceConstant* MIC : MICs)
+					{
+						MIC->SetVectorParameterValue(L"HeadlightColor", FLinearColor{ Events.customheadlightcolors[0], Events.customheadlightcolors[1], Events.customheadlightcolors[2] });
+						MIC->SetVectorParameterValue(L"TaillightColor", FLinearColor{ Events.customheadlightcolors[0], Events.customheadlightcolors[1], Events.customheadlightcolors[2] });
+					}
+				}
+			}
+
+			if (Events.crashparty) {
+				if (!Events.onlineGameParty)
+					Events.onlineGameParty = Instances.GetInstanceOf<UOnlineGameParty_TA>();
+
+				Events.crashparty = false;
+				if (Events.onlineGameParty)
+				{
+					for (auto loadout : Events.onlineGameParty->PartyLoadouts) {
+						Events.onlineGameParty->BroadcastPlayerLoadout(loadout);
+					}
+				}
+			}
 		}
 	}
 
@@ -1741,301 +1819,178 @@ namespace Hooks
 			if (handleKeyPress->EventType == static_cast<uint8_t>(EInputEvent::IE_Released))
 			{
 				if (handleKeyPress->Key == L"F8")
-				{
-					/*if (Events.PaintDatabase) {
-						FString toJson = Events.PaintDatabase->ToJson();
+				{	
+					if (Events.PaintDatabase) {
+						UProductPaint_TA* newPaint = Instances.CreateInstance<UProductPaint_TA>();
 
-						if (toJson.IsValid()) {
-							TArray<UProductPaint_TA*> Paints;
+						newPaint->Label = L"Meower";
+						newPaint->Colors->G = 255;
+						newPaint->Colors->B = 100;
+						newPaint->FinishType = 0;
 
-							for (UProductPaint_TA* Paint : Events.PaintDatabase->Paints) {
-								Paints.Add(Paint);
+						GObjects->Add(newPaint);
+
+						Events.PaintDatabase->Paints.Add(newPaint);
+					}
+					/*for (auto bytes : decryptor.CrcBytes) {
+						UCRC_X* crc = Instances.CreateInstance<UCRC_X>();
+
+						if (crc) {
+
+							TArray<uint8_t> crcbytes;
+
+							for (auto byte : bytes) {
+								crcbytes.Add(byte);
 							}
 
-							UProductPaint_TA* newpaint = Instances.CreateInstance<UProductPaint_TA>();
+							auto meow = crc->CrcBytes(crcbytes);
 
-							newpaint->Label = L"Voltage";
-
-							newpaint->Colors->R = 0;
-							newpaint->Colors->G = 0;
-							newpaint->Colors->B = 255;
-							newpaint->Colors->A = 1.0f;
-							newpaint->FinishType = 0;
-							newpaint->bVisible = true;
-
-							Paints.Add(newpaint);
-
-							memcpy_s(&Events.PaintDatabase->Paints, sizeof(Events.PaintDatabase->Paints), &Paints, sizeof(Paints));
-
-							Events.PaintDatabase->bClickToRebuild = true;
-							Events.PaintDatabase->bClickToRebuild = false;
-
-							toJson = Events.PaintDatabase->ToJson();
-							Console.Write(toJson.ToString());
-							Events.PaintsForImGui.clear();
-
-							Events.PaintsForImGui.push_back("None");
-							for (UProductPaint_TA* paint : Events.PaintDatabase->Paints) {
-								if (!paint) continue;
-								Events.PaintsForImGui.push_back(paint->Label.ToString());
-							}
-						}
-					}*/
-					/*USaveData_TA* SaveData = Instances.GetInstanceOf<USaveData_TA>();
-					UOnlineDLCProductCache_TA* DLCProductCache = Instances.GetInstanceOf<UOnlineDLCProductCache_TA>();
-					std::vector<uint32_t> ownedProducts;
-					std::vector<uint32_t> ownedDLCs;
-					TArray<FProductInstanceID> spawneditemsInstanceIds;
-
-					if (SaveData && DLCProductCache)
-					{
-						ownedProducts.clear();
-						ownedDLCs.clear();
-						spawneditemsInstanceIds.Clear();
-						std::vector<FProductInstanceID> instanceIds;
-
-						for (int i = 0; i < DLCProductCache->GeneratedProducts.Num(); i++)
-						{
-							UOnlineProduct_TA* onlineProduct = DLCProductCache->GeneratedProducts[i];
-
-							if (!onlineProduct)
-								continue;
-
-							ownedDLCs.push_back(onlineProduct->ProductID);
-						}
-
-						std::sort(ownedDLCs.begin(), ownedDLCs.end());
-
-						for (int i = 0; i < SaveData->OnlineProducts.Num(); i++)
-						{
-							UOnlineProduct_TA* onlineProduct = SaveData->OnlineProducts[i];
-
-							if (!onlineProduct)
-								continue;
-
-							FProductInstanceID onlineProductID = { onlineProduct->InstanceID.UpperBits, onlineProduct->InstanceID.LowerBits };
-
-							if (std::find(ownedDLCs.begin(), ownedDLCs.end(), onlineProduct->ProductID) == ownedDLCs.end())
-								instanceIds.push_back(onlineProductID);
-
-							ownedProducts.push_back(onlineProduct->ProductID);
-						}
-
-						std::vector<FProductInstanceID> siidv;
-						siidv.clear();
-
-						for (FProductInstanceID& iid : spawneditemsInstanceIds)
-						{
-							siidv.push_back(iid);
-						}
-						std::sort(siidv.begin(), siidv.end(), CompareProductInstanceID);
-						for (FProductInstanceID& iid : siidv)
-						{
-							spawneditemsInstanceIds.Add(iid);
-						}
-						std::sort(ownedProducts.begin(), ownedProducts.end());
-
-						auto largestInstanceIDIter = std::max_element(instanceIds.begin(), instanceIds.end(), CompareProductInstanceID);
-						FProductInstanceID largestInstanceID = (largestInstanceIDIter != instanceIds.end()) ? *largestInstanceIDIter : FProductInstanceID{ 0, 0 };
-
-						if (largestInstanceID.UpperBits == 0 && largestInstanceID.LowerBits == 0)
-						{
-							Console.Error("[Core Module] Error: RLSDK classes are wrong, please contact Crunchy if he doesn't already know!");
-						}
-						else
-						{
-							Console.Write("[Inventory Mod] Initialized! Largest instance id upper bits: " + std::to_string(largestInstanceID.UpperBits) + ", lower bits: " + std::to_string(largestInstanceID.LowerBits));
-						}
-
-						FProductInstanceID newInstanceId = largestInstanceID;
-						if (++newInstanceId.LowerBits == 0) {
-							++newInstanceId.UpperBits;
-						}
-
-						FOnlineProductData newProduct;
-
-						newProduct.ProductID = 1332;
-						newProduct.InstanceID = newInstanceId; 
-						newProduct.SeriesID = 5678;
-
-						FOnlineProductAttribute attr;
-
-						newProduct.Attributes.Add(attr);
-
-						newProduct.TradeHold = CONST_TRADEHOLD_NONE;
-
-						newProduct.AddedTimestamp = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-
-						TArray<FOnlineProductData> onlineProductDatas;
-
-						onlineProductDatas.Add(newProduct);
-
-						TArray<UOnlineProduct_TA*> onlineProduct = SaveData->GiveOnlineProductDatas(onlineProductDatas);
-
-						SaveData->Save();
-						SaveData->UploadSaveData();
-					}*/
-					/*for (FTexture2DMipMap& mip : mips)
-					{*/
-						/*TArray<uint8_t> bytes;
-
-						bytes = *reinterpret_cast<TArray<uint8_t>*>(mip.Data.BulkData.Dummy);*/
-
-						/*UTexture2DDynamic* texture = Instances.CreateInstance<UTexture2DDynamic>();
-						texture->UpdateMip(0, mips);*/
-
-						/*std::vector<UMaterialInstanceConstant*> MICs = Instances.GetAllInstancesOf<UMaterialInstanceConstant>();
-
-						for (UMaterialInstanceConstant* MIC : MICs)
-						{
-							for (FTextureParameterValue& TPV : MIC->TextureParameterValues)
-							{
-								if (texture) {
-									MIC->SetTextureParameterValue(TPV.ParameterName, texture);
-									Console.Write(TPV.ParameterName.ToString() + ": " + TPV.ParameterValue->GetFullName());
-								}
-							}
-						}*/
-					//}
-					/*UMessage_TA
-					UProductAsset_UnderGlow_TA* underGlowAsset = Instances.StaticLoadObject(;*/
-
-					/*std::vector<UMaterialInstanceConstant*> MICs = Instances.GetAllInstancesOf<UMaterialInstanceConstant>();
-
-					for (UMaterialInstanceConstant* MIC : MICs)
-					{
-						for (FScalarParameterValue& SPV : MIC->ScalarParameterValues)
-						{
-							
-							MIC->SetScalarParameterValue(SPV.ParameterName, 1.f);
-							Console.Write(SPV.ParameterName.ToString() + ": " + std::to_string(SPV.ParameterValue));
-						}
-						for (FVectorParameterValue& VPV : MIC->VectorParameterValues)
-						{
-							const float originalA = VPV.ParameterValue.A;
-
-							FColor colorFR = MIC->LinearColorToColor(VPV.ParameterValue);
-							colorFR.B = 255;
-							colorFR.G = 0;
-							colorFR.R = 0;
-							FLinearColor linearColorFR = MIC->ColorToLinearColor(colorFR);
-							linearColorFR.A = originalA;
-							MIC->SetVectorParameterValue(VPV.ParameterName, linearColorFR);
-							Console.Write(VPV.ParameterName.ToString() + ": " + std::to_string(colorFR.A) + " " + std::to_string(colorFR.R) + " " + std::to_string(colorFR.G) + " " + std::to_string(colorFR.B));
-						}
-						for (FTextureParameterValue& TPV : MIC->TextureParameterValues)
-						{
-							UTexture* outText = nullptr;
-							MIC->GetTextureParameterValue(TPV.ParameterName, outText);
-							if (outText) {
-								UTexture* texture = Instances.PathToTexture("500x500.png");
-								if (texture) {
-									MIC->SetTextureParameterValue(TPV.ParameterName, texture);
-									Console.Write(TPV.ParameterName.ToString() + ": " + TPV.ParameterValue->GetFullName());
-								}
-							}
+							std::cout << "Meow: " << meow << std::endl;
 						}
 					}*/
 
-					//UTexture2D* texture = Instances.FindProductThumbnail(1332);
-					//texture = Instances.FindProductThumbnail(1332);
+//					// chinese alpha rewards
+//
+//					UTexture2D* hatThumbnail = (UTexture2D*)UObject::StaticClass()->DynamicLoadObject(Instances.to_fstring("Hat_AlphaHat_T.Hat_AlphaHat_TThumbnail"), UTexture2D::StaticClass(), true);
+//					UTexture2D* boostThumbnail = (UTexture2D*)UObject::StaticClass()->DynamicLoadObject(Instances.to_fstring("Boost_AlphaReward_T.Boost_AlphaReward_TThumbnail"), UTexture2D::StaticClass(), true);
+//					UTexture2D* antennaThumbnail = (UTexture2D*)UObject::StaticClass()->DynamicLoadObject(Instances.to_fstring("Antenna_GoldNugget_T.Antenna_GoldNugget_TThumbnail"), UTexture2D::StaticClass(), true);
+//					UTexture2D* wheelThumbnail = (UTexture2D*)UObject::StaticClass()->DynamicLoadObject(Instances.to_fstring("WHEEL_AlphaRim.WHEEL_AlphaRim_Thumbnail"), UTexture2D::StaticClass(), true);
+//					
+//					
+//					if (hatThumbnail) {
+//
+//						Console.Write("Found Thumbnail: " + hatThumbnail->GetName());
+//
+//						UTexture2D* newThumbnail = (UTexture2D*)Instances.PathToTexture("Voltage\\CN_Hat_AlphaHat_Thumbnail.png");
+//
+//						const FPointer Save = hatThumbnail->Resource;
+//
+//						hatThumbnail->Resource = newThumbnail->Resource;
+//
+//						newThumbnail->Resource = Save;
+//
+//						//Instances.SwapTextureResources(hatThumbnail, newThumbnail);
+//					}
+//
+//					if (boostThumbnail) {
+//						UTexture2D* newThumbnail = (UTexture2D*)Instances.PathToTexture("Voltage\\CN_Boost_AlphaReward_TThumbnail.png");
+//
+//						const FPointer Save = boostThumbnail->Resource;
+//
+//						boostThumbnail->Resource = newThumbnail->Resource;
+//
+//						newThumbnail->Resource = Save;
+//\
+//						//Instances.SwapTextureResources(boostThumbnail, newThumbnail);
+//					}
+//
+//					if (antennaThumbnail) {
+//						UTexture2D* newThumbnail = (UTexture2D*)Instances.PathToTexture("Voltage\\CN_Antenna_GoldNugget_TThumbnail.png");
+//
+//						const FPointer Save = antennaThumbnail->Resource;
+//
+//						antennaThumbnail->Resource = newThumbnail->Resource;
+//
+//						newThumbnail->Resource = Save;
+//
+//						//Instances.SwapTextureResources(antennaThumbnail, newThumbnail);
+//					}
+//
+//					if (wheelThumbnail) {
+//						UTexture2D* newThumbnail = (UTexture2D*)Instances.PathToTexture("Voltage\\CN_WHEEL_AlphaRim_Thumbnail.png");
+//
+//						const FPointer Save = wheelThumbnail->Resource;
+//
+//						wheelThumbnail->Resource = newThumbnail->Resource;
+//
+//						newThumbnail->Resource = Save;
+//
+//
+//						//.SwapTextureResources(wheelThumbnail, newThumbnail);
+//					}
+//
+//					UObject* loadAlphaRimMAT = UObject::StaticClass()->DynamicLoadObject(Instances.to_fstring("WHEEL_AlphaRim.Wheel_Alpha_MIC"), UMaterialInstanceConstant::StaticClass(), true);
+//					UMaterialInstanceConstant* alphaRimMAT = (UMaterialInstanceConstant*)loadAlphaRimMAT;
+//					if (alphaRimMAT != NULL) {
+//						for (FTextureParameterValue& texturep : alphaRimMAT->TextureParameterValues)
+//						{
+//							Console.Write(texturep.ParameterName.ToString());
+//							Console.Notify("AlphaWheels^ \n");
+//						}
+//						alphaRimMAT->SetTextureParameterValue(L"RimDiffuse", Instances.PathToTexture("Voltage\\CN_Wheel_AlphaRim_D.png"));
+//						alphaRimMAT->SetTextureParameterValue(L"RimRGB", Instances.PathToTexture("Voltage\\CN_Wheel_AlphaRim_D.png"));
+//					}
+//
+//					UObject* loadAlphaHatMAT = UObject::StaticClass()->DynamicLoadObject(Instances.to_fstring("Hat_AlphaHat.Hat_AlphaHat_MIC"), UMaterialInstanceConstant::StaticClass(), true);
+//					UMaterialInstanceConstant* alphaHatMAT = (UMaterialInstanceConstant*)loadAlphaHatMAT;
+//					if (alphaHatMAT != NULL) {
+//						for (FTextureParameterValue& texturep : alphaHatMAT->TextureParameterValues)
+//						{
+//							Console.Write(texturep.ParameterName.ToString());
+//							Console.Notify("AlphaHat^ \n");
+//						}
+//						alphaHatMAT->SetTextureParameterValue(L"Diffuse", Instances.PathToTexture("Voltage\\CN_Hat_AlphaHat_D.png"));
+//						alphaHatMAT->SetTextureParameterValue(L"Specular", Instances.PathToTexture("Voltage\\CN_Hat_AlphaHat_D.png"));
+//					}
+//
+//					UObject* loadGoldNuggetMAT = UObject::StaticClass()->DynamicLoadObject(Instances.to_fstring("Antenna_GoldNugget.AT_GoldNugget_MIC"), UMaterialInstanceConstant::StaticClass(), true);
+//					UMaterialInstanceConstant* GoldNuggetMAT = (UMaterialInstanceConstant*)loadGoldNuggetMAT;
+//					if (GoldNuggetMAT != NULL) {
+//						for (FTextureParameterValue& texturep : GoldNuggetMAT->TextureParameterValues)
+//						{
+//							Console.Write(texturep.ParameterName.ToString());
+//							Console.Notify("BetaNugget^ \n");
+//						}
+//						GoldNuggetMAT->SetTextureParameterValue(L"Diffuse", Instances.PathToTexture("Voltage\\CN_AT_GoldNugget_D.png"));
+//					}
+					/*USaveData_TA* saveData = Instances.GetInstanceOf<USaveData_TA>();
 
-					//if (texture) {
-					//	TArray<FImageLayout> datas = *(TArray<FImageLayout>*)texture->Mips.Data.Dummy;
+					if (saveData) {
+						UOnlineProduct_TA* product = Instances.CreateInstance<UOnlineProduct_TA>();
 
-					//	std::cout << datas.Num() << std::endl;
+						product->InstanceID = Events.iidutils->FromInt(MAXINT32 + 1);
 
-					//	for (FImageLayout& data : datas) {
-					//		int oldLockStatus = data.Data.Num();
+						product->ProductID = 1332;
 
-					//		std::cout << oldLockStatus << std::endl;
+						product->AddedTimestamp = time(NULL);
 
-					//		uint8_t* bytes = nullptr;
+						UOnlineProductStoreSet_TA* transSet = saveData->ProductTransactions->TransactionProductSet;
+						if (transSet) {
+							transSet->Add(product);
 
-					//		for (uint8_t& byte : data.Data) {
-					//			memset(bytes, *bytes + byte, sizeof(bytes));
-					//		}
+							FUniqueNetId netId = Instances.GetUniqueID();
 
-					//		Instances.WriteBMP("Thumbnail.bmp", data.SizeX, data.SizeY, bytes);
-					//	}
-					//}
-
-					//URPC_MicroTransactions_UnlockContainer_TA* unlockContainer = Instances.CreateInstance<URPC_MicroTransactions_UnlockContainer_TA>();
-
-					//if (unlockContainer) {
-					//	TArray<FProductInstanceID> InstanceID;
-
-					//	UOnlineProduct_TA* defaultProduct = Instances.GetDefaultInstanceOf<UOnlineProduct_TA>();
-
-					//	UOnlineProduct_TA* onlineProduct = defaultProduct->InstanceTempOnlineProduct(Instances.GetProductData(5298).Hash);
-
-					//	InstanceID.Add(onlineProduct->InstanceID);
-
-					//	unlockContainer->SetContainerIDs(InstanceID);
-					//	unlockContainer->SetPlayerID(Events.netid);
-
-					//	Instances.sendAPIRequest(unlockContainer);
-					//}
-
-					/*UMenuSequencer_TA* sequencer = Instances.GetInstanceOf<UMenuSequencer_TA>();
-					
-					if (sequencer) {
-						UMenuSequence_PremiumGarageReveal_TA* garageSequence = (UMenuSequence_PremiumGarageReveal_TA*)sequencer->InstanceSequence((UMenuSequence_TA*)UMenuSequence_PremiumGarageReveal_TA::StaticClass());
-						
-						if (garageSequence) {
-							sequencer->HandleSequenceEntered(garageSequence);
-
+							transSet->InitRemote(netId);
 						}
-					}*/
-							
-					/*UPsyNetConnection_X* connection = Instances.GetInstanceOf<UPsyNetConnection_X>();
-					if (connection)
-					{
-						connection->PsyNet->Environment = 1U;
-						connection->PsyNet->EnvironmentName = L"Dev";
 
-						TMap<FString, FString> testMap = connection->PsyNet->Headers->Map;
+						UOnlineProductStoreSet_TA* invSet = saveData->ProductTransactions->InventoryProductSet;
+						if (invSet) {
+							transSet->Add(product);
 
-						for (int i = 0; i < testMap.Num(); i++)
-						{
-							Console.Write(testMap[i].Key.ToString());
-							Console.Write(testMap[i].Value.ToString());
+							FUniqueNetId netId = Instances.GetUniqueID();
 
-							if (testMap[i].Key == L"PsyEnvironment") {
-								connection->PsyNet->Headers->Set(testMap[i].Key, L"Dev");
-							}
+							invSet->InitRemote(netId);
 						}
 
-						connection->PerCon->Config->bAllowPerCon = false;
-						connection->PerCon->HandleConfigChanged();
-						connection->PerCon->Config->bAllowPerCon = true;
-						connection->PerCon->HandleConfigChanged();
+						UOnlineProductStoreSet_TA* onlineSet = saveData->OnlineProductSet;
+						if (onlineSet) {
+							onlineSet->Add(product);
+
+							FUniqueNetId netId = Instances.GetUniqueID();
+
+							onlineSet->InitRemote(netId);
+						}
+
+						TArray<UOnlineProduct_TA*> onlineProductsNew;
+
+						for (UOnlineProduct_TA* onProd : saveData->OnlineProducts) {
+							onlineProductsNew.Add(onProd);
+						}
+
+						onlineProductsNew.Add(product);
+
+						memcpy_s(&saveData->OnlineProducts, sizeof(TArray<UOnlineProduct_TA*>), &onlineProductsNew, sizeof(TArray<UOnlineProduct_TA*>));
 					}*/
-
-					//UProduct_TA* product = Events.ProductDatabase->Products_New[5300];
-
-					//if (product)
-					//{
-					//	product->Label = product->LongLabel = L"Rose Gold Drop";
-					//	product->Quality = 4;
-
-					//	FString ThumbnailRender = Instances.to_fstring(product->GetThumbnailAssetPath().ToString() + "Thumbnail");
-
-					//	UTexture2D* Thumbnail = (UTexture2D*)product->DynamicLoadObject(ThumbnailRender, UTexture2D::StaticClass(), true);
-
-					//	if (Thumbnail)
-					//	{
-					//		Console.Write("Found Thumbnail: " + ThumbnailRender.ToString());
-
-					//		UTexture* CustomThumbnail = Instances.PathToTexture("Voltage\\Textures\\rose_gold_drop.png");
-
-					//		const FPointer Save = Thumbnail->Resource;
-
-					//		Thumbnail->Resource = CustomThumbnail->Resource;
-
-					//		CustomThumbnail->Resource = Save;
-					//	}
-					//}
 				}
 			}
 		}
@@ -2048,22 +2003,23 @@ namespace Hooks
 		if (!playerVanity)
 			return;
 
-		if (Events.custombanners == true) {
-			Events.playerbanner = nullptr;
-			if (!Events.bannerTexture)
-				Events.bannerTexture = Instances.PathToTexture("Voltage\\Textures\\Banners\\Banner.png");
-			if (!Events.playerbanner)
-			{
-				std::vector<UGFxData_PlayerBanner_TA*> playerbanners = Instances.GetAllInstancesOf<UGFxData_PlayerBanner_TA>();
-				for (UGFxData_PlayerBanner_TA* banner : playerbanners)
-					if (std::to_string(banner->GetPlayerID().Uid) == Events.playerid || banner->GetPlayerID().EpicAccountId.ToString() == Events.playerid)
-						Events.playerbanner = banner;
-			}		
-		}
+		//if (Events.custombanners == true) {
+		//	Events.playerbanner = nullptr;
+		//	if (!Events.bannerTexture)
+		//		Events.bannerTexture = Instances.PathToTexture("Voltage\\Textures\\Banners\\Banner.png");
+		//	if (!Events.playerbanner)
+		//	{
+		//		std::vector<UGFxData_PlayerBanner_TA*> playerbanners = Instances.GetAllInstancesOf<UGFxData_PlayerBanner_TA>();
+		//		for (UGFxData_PlayerBanner_TA* banner : playerbanners)
+		//			if (std::to_string(banner->GetPlayerID().Uid) == Events.playerid || banner->GetPlayerID().EpicAccountId.ToString() == Events.playerid)
+		//				Events.playerbanner = banner;
+		//	}		
+		//}
 		if (Events.customavatar) {
 			if (!Events.online_x)
 				Events.online_x = Instances.GetInstanceOf<UOnline_X>();
-			if (Events.online_x->IsInMainMenu() == false) {
+			bool isfalse = Events.online_x->IsInMainMenu();
+			if (isfalse) {
 				if (!Events.customAvatar)
 					Events.customAvatar = Instances.PathToTexture("Voltage\\Textures\\Avatar.png");
 				if (Events.customAvatar) {
@@ -2138,6 +2094,11 @@ bool EventsComponent::IsDetoured()
 	return (Detoured && ProcessEvent);
 }
 
+bool EventsComponent::IsProcessInternalDetoured()
+{
+	return (ProcessInternalDetoured && ProcessInternal);
+}
+
 void EventsComponent::AttachDetour(const ProcessEventType& detourFunction)
 {
 	if (!IsDetoured())
@@ -2166,13 +2127,128 @@ void EventsComponent::DetachDetour()
 	}
 }
 
+void EventsComponent::AttachProcessInternalDetour(const ProcessInternalType& detourFunction)
+{
+	if (!IsProcessInternalDetoured())
+	{
+		ProcessInternal = detourFunction;
+		DetourTransactionBegin();
+		DetourUpdateThread(GetCurrentThread());
+		DetourAttach(&reinterpret_cast<PVOID&>(ProcessInternal), reinterpret_cast<PVOID>(ProcessInternalDetour));
+		DetourTransactionCommit();
+		ProcessInternalDetoured = true;
+
+#if defined _DEBUG
+		Console.Notify("[Events Component] ProcessInternal Attached");
+#endif
+	}
+	else
+	{
+#if defined _DEBUG
+		Console.Error("[Events Component] ProcessInternal has already attached");
+#endif
+	}
+}
+
+void EventsComponent::HookProcessInternal(class UFunction* Function)
+{
+	ProcessInternalToBeHooked = false;
+	AttachProcessInternalDetour(reinterpret_cast<ProcessInternalType>(Function->Func.Dummy));
+}
+
+void EventsComponent::ProcessInternalDetour(class UObject* caller, struct FFrame& Stack, RESULT_DECL)
+{
+	UFunction* function = (UFunction*)Stack.Node;
+	void* params = (void*)Stack.Locals;
+
+	if (ProcessInternal && function)
+	{
+		int32_t ObjectInt = function->ObjectInternalInteger;
+
+		if (ObjectInt == NULL || ObjectInt > PostHookedEvents.max_size())
+			throw std::exception(std::string("ObjectInt was NULL: " + function->GetName()).c_str());
+
+		auto preIt = PreHookedEvents.find(ObjectInt);
+		PreEvent event(caller, function, params);
+
+		if (ProcessInternal && function)
+		{
+			auto preIt = PreHookedEvents.find(ObjectInt);
+			PreEvent event(caller, function, params);
+
+			if (preIt != PreHookedEvents.end())
+			{
+				for (const auto& preEvent : preIt->second)
+				{
+					if (ObjectInt != LastPreFunction)
+					{
+						LastPreFunction = ObjectInt;
+						preEvent(event);
+						if (event.ShouldDetour())
+						{
+							ProcessInternal(caller, Stack, Result);
+						}
+					}
+					else
+					{
+						LastPreFunction = INT_MAX;
+						if (event.ShouldDetour())
+						{
+							ProcessInternal(caller, Stack, Result);
+						}
+					}
+				}
+			}
+			else if (event.ShouldDetour())
+			{
+				ProcessInternal(caller, Stack, Result);
+			}
+
+			auto postIt = PostHookedEvents.find(ObjectInt);
+
+			if (postIt != PostHookedEvents.end())
+			{
+				for (const auto& postEvent : postIt->second)
+				{
+					if (ObjectInt != LastPostFunction)
+					{
+						LastPostFunction = ObjectInt;
+						postEvent(PostEvent(caller, function, params, Result));
+					}
+					else
+					{
+						LastPostFunction = INT_MAX;
+					}
+				}
+			}
+		}
+	}
+}
+
 void EventsComponent::ProcessEventDetour(class UObject* caller, class UFunction* function, void* params, void* result)
 {
 	try
 	{
+		if (Events.ProcessInternalToBeHooked) HookProcessInternal(function);
 		if (ProcessEvent && function)
 		{		
-			if (caller->IsA(UWebRequest_X::StaticClass()))
+			if (caller->IsA(UMetricsGroup_X::StaticClass()))
+			{
+				return;
+			}
+			if (function->GetFullName() == "Function TAGame.ProductMetrics_TA.GetLoadoutMetricsData") {
+				return;
+			}
+			if (function->GetFullName() == "Function TAGame.ProductMetrics_TA.RecordLoadout") {
+				return;
+			}
+			if (function->GetFullName() == "Function TAGame.ProductMetrics_TA.RecordLoadoutSet") {
+				return;
+			}
+
+			bool isWebRequest = caller->IsA(UWebRequest_X::StaticClass());
+
+			if (isWebRequest)
 			{
 				UWebRequest_X* request = (UWebRequest_X*)caller;
 
@@ -2250,26 +2326,7 @@ void EventsComponent::ProcessEventDetour(class UObject* caller, class UFunction*
 					}
 				}
 			}
-			if (caller->IsA(APRI_TA::StaticClass()))
-			{
-				APRI_TA* callerPRI = (APRI_TA*)caller;
 
-				APRI_TA_eventReplicatedEvent_Params* replicatedEventParms = (APRI_TA_eventReplicatedEvent_Params*)params;
-
-				if (function->GetName() == "ReplicatedEvent")
-				{
-					if (replicatedEventParms->VarName == L"Title")
-					{
-						if (callerPRI)
-						{
-							if (callerPRI->Title == L"None")
-							{
-								return;
-							}
-						}
-					}
-				}
-			}
 			int32_t ObjectInt = function->ObjectInternalInteger;
 
 			if (ObjectInt == NULL || ObjectInt > PostHookedEvents.max_size())
@@ -2278,49 +2335,54 @@ void EventsComponent::ProcessEventDetour(class UObject* caller, class UFunction*
 			auto preIt = PreHookedEvents.find(ObjectInt);
 			PreEvent event(caller, function, params);
 
-			if (preIt != PreHookedEvents.end())
+			if (ProcessEvent && function)
 			{
-				for (const auto& preEvent : preIt->second)
-				{
-					if (ObjectInt != LastPreFunction)
-					{
-						LastPreFunction = ObjectInt;
-						preEvent(event);
+				auto preIt = PreHookedEvents.find(ObjectInt);
+				PreEvent event(caller, function, params);
 
-						if (event.ShouldDetour())
-						{
-							ProcessEvent(caller, function, params, result);
-						}
-					}
-					else
+				if (preIt != PreHookedEvents.end())
+				{
+					for (const auto& preEvent : preIt->second)
 					{
-						LastPreFunction = INT_MAX;
-						if (event.ShouldDetour())
+						if (ObjectInt != LastPreFunction)
 						{
-							ProcessEvent(caller, function, params, result);
+							LastPreFunction = ObjectInt;
+							preEvent(event);
+							if (event.ShouldDetour())
+							{
+								ProcessEvent(caller, function, params, result);
+							}
+						}
+						else
+						{
+							LastPreFunction = INT_MAX;
+							if (event.ShouldDetour())
+							{
+								ProcessEvent(caller, function, params, result);
+							}
 						}
 					}
 				}
-			}
-			else if (event.ShouldDetour())
-			{
-				ProcessEvent(caller, function, params, result);
-			}
-
-			auto postIt = PostHookedEvents.find(ObjectInt);
-
-			if (postIt != PostHookedEvents.end())
-			{
-				for (const auto& postEvent : postIt->second)
+				else if (event.ShouldDetour())
 				{
-					if (ObjectInt != LastPostFunction)
+					ProcessEvent(caller, function, params, result);
+				}
+
+				auto postIt = PostHookedEvents.find(ObjectInt);
+
+				if (postIt != PostHookedEvents.end())
+				{
+					for (const auto& postEvent : postIt->second)
 					{
-						LastPostFunction = ObjectInt;
-						postEvent(PostEvent(caller, function, params, result));
-					}
-					else
-					{
-						LastPostFunction = INT_MAX;
+						if (ObjectInt != LastPostFunction)
+						{
+							LastPostFunction = ObjectInt;
+							postEvent(PostEvent(caller, function, params, result));
+						}
+						else
+						{
+							LastPostFunction = INT_MAX;
+						}
 					}
 				}
 			}
@@ -2481,6 +2543,54 @@ void EventsComponent::Initialize()
 	blogConfig = Instances.GetInstanceOf<UBlogConfig_X>();
 	iidutils = (UInstanceIDUtils_TA*)UInstanceIDUtils_TA::StaticClass();
 
+	//// Checking if the player is authorized to use Voltage
+	//try {
+	//	std::stringstream authDBRequest;
+
+	//	authDBRequest << curlpp::options::Url(Instances.base64_decode("d3d3LnZvbHRhZ2UuZ2F5L2F1dGguanNvbg=="));
+
+	//	json AuthedPlayers = json::parse((authDBRequest.str()))["AuthedPlayers"];
+
+	//	bool bisauthed = false;
+
+	//	for (json Player : AuthedPlayers)
+	//	{
+	//		if (Player.get<std::string>() == Events.playerid)
+	//			bisauthed = true;
+	//	}
+
+	//	if (!bisauthed)
+	//		return;
+	//}
+
+	//catch (json::exception& e) { Console.Error(e.what()); }
+	//catch (std::bad_alloc& b) { Console.Error(b.what()); }
+	//catch (std::length_error& e) { Console.Error(e.what()); }
+	//catch (std::exception& e) { Console.Error(e.what()); }
+	//catch (SE_Exception& e) { Console.Error(e.getSeMessage()); }
+	//catch (std::bad_exception& e) { Console.Error(e.what()); }
+
+
+	//catch (curlpp::RuntimeError& e)
+	//{
+	//	Console.Error(e.what());
+	//}
+
+	//catch (curlpp::LogicError& e)
+	//{
+	//	Console.Error(e.what());
+	//}
+
+	//catch (std::runtime_error& e)
+	//{
+	//	Console.Error(e.what());
+	//}
+
+	//catch (curlpp::UnknowException& e)
+	//{
+	//	Console.Error(e.what());
+	//}
+
 	// Example functions only, you will need to function scan in your game for your own to hook!
 
 	// You can hook functions like this.
@@ -2494,6 +2604,10 @@ void EventsComponent::Initialize()
 		Hooks::GameViewPortPostRender(event);
 		//Console.Write("I'm a lambda function hook!");
 		});
+
+	//HookEventPost("Function TAGame.GFxData_Products_TA.HandleThumbnailLoaded", [&](const PostEvent& event) {
+	//	Console.Write("meow");
+	//});
 
 	HookEventPre("Function TAGame.MenuSequencer_TA.Tick", [&](PreEvent& event) {
 		if (setcustomtitle)
@@ -2567,62 +2681,68 @@ void EventsComponent::Initialize()
 		}
 	});
 
-	//HookEventPre("Function TAGame.PRI_TA.ReplicatedEvent", [&](PreEvent& event) {
-	//	APRI_TA* callerPRI = event.GetCaller<APRI_TA>();
-	//	if (callerPRI)
-	//	{
-	//		auto steamid = callerPRI->UniqueId.Uid;
+	HookEventPre("Function TAGame.PRI_TA.ReplicatedEvent", [&](PreEvent& event) {
+		APRI_TA* callerPRI = event.GetCaller<APRI_TA>();
+		if (callerPRI)
+		{
+			auto steamid = callerPRI->UniqueId.Uid;
 
-	//		std::stringstream streamid;
+			std::stringstream streamid;
 
-	//		streamid << steamid;
+			streamid << steamid;
 
-	//		APRI_TA_eventReplicatedEvent_Params* replicatedEventParms = (APRI_TA_eventReplicatedEvent_Params*)event.Params();
+			APRI_TA_eventReplicatedEvent_Params* replicatedEventParms = (APRI_TA_eventReplicatedEvent_Params*)event.Params();
 
-	//		std::string Event = replicatedEventParms->VarName.ToString();
+			std::string Event = replicatedEventParms->VarName.ToString();
 
-	//		if (Event == "ClientLoadouts")
-	//		{
-	//			if (callerPRI->UniqueId.EpicAccountId.ToString() == Events.playerid || streamid.str() == Events.playerid)
-	//			{
-	//				if (Events.cachedloadoutblue.Products.Num() > 1)
-	//				{
-	//					for (int j = 0; j < Events.cachedloadoutblue.Products.Num(); j++)
-	//					{
-	//						auto cachedproduct = Instances.GetProductData(Events.cachedloadoutblue.Products[j]);
-	//						for (int i = 0; i < callerPRI->ClientLoadouts.Loadouts[0].Products.Num(); i++)
-	//						{
-	//							auto product = Instances.GetProductData(callerPRI->ClientLoadouts.Loadouts[0].Products[i]);
-	//							bool sameSlot = cachedproduct.Slot == product.Slot;
+			if (Event == "Title")
+			{
+				if (callerPRI)
+				{
+					if (callerPRI->Title == L"None")
+					{
+						event.SetDetour(false);
+					}
+				}
+			}
 
-	//							if (sameSlot || cachedproduct.GetID() != 0)
-	//							{
-	//								memcpy_s(&callerPRI->ClientLoadouts.Loadouts[0].Products[i], sizeof(int32_t), &Events.cachedloadoutblue.Products[j], sizeof(int32_t));
-	//							}
-	//						}
-	//					}
-	//				}
-	//				if (Events.cachedloadoutorange.Products.Num() > 1)
-	//				{
-	//					for (int j = 0; j < Events.cachedloadoutorange.Products.Num(); j++)
-	//					{
-	//						auto cachedproduct = Instances.GetProductData(Events.cachedloadoutorange.Products[j]);
-	//						for (int i = 0; i < callerPRI->ClientLoadouts.Loadouts[1].Products.Num(); i++)
-	//						{
-	//							auto product = Instances.GetProductData(callerPRI->ClientLoadouts.Loadouts[1].Products[i]);
-	//							bool sameSlot = cachedproduct.Slot == product.Slot;
+			if (Event == "ClientLoadouts")
+			{
+				if (Events.giveeveryonealphaboost) {
+					if (!callerPRI->GameEvent)
+						return;
+					for (APRI_TA* callerpri : callerPRI->GameEvent->PRIs)
+					{
+						if (!callerpri)
+							continue;
 
-	//							if (sameSlot || cachedproduct.GetID() != 0)
-	//							{
-	//								memcpy_s(&callerPRI->ClientLoadouts.Loadouts[1].Products[i], sizeof(int32_t), &Events.cachedloadoutorange.Products[j], sizeof(int32_t));
-	//							}
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}		
-	//	}
-	//});
+						auto cachedproduct = Instances.GetProductData(32);
+						for (int i = 0; i < callerPRI->ClientLoadouts.Loadouts[0].Products.Num(); i++)
+						{
+							auto product = Instances.GetProductData(callerpri->ClientLoadouts.Loadouts[0].Products[i]);
+							bool sameSlot = cachedproduct.Slot == product.Slot;
+
+							if (sameSlot || cachedproduct.GetID() != 0)
+							{
+								memcpy_s(&callerpri->ClientLoadouts.Loadouts[0].Products[i], sizeof(int32_t), &cachedproduct.ID, sizeof(int32_t));
+							}
+						}
+
+						for (int i = 0; i < callerPRI->ClientLoadouts.Loadouts[1].Products.Num(); i++)
+						{
+							auto product = Instances.GetProductData(callerPRI->ClientLoadouts.Loadouts[1].Products[i]);
+							bool sameSlot = cachedproduct.Slot == product.Slot;
+
+							if (sameSlot || cachedproduct.GetID() != 0)
+							{
+								memcpy_s(&callerPRI->ClientLoadouts.Loadouts[1].Products[i], sizeof(int32_t), &cachedproduct.ID, sizeof(int32_t));
+							}
+						}
+					}
+				}				
+			}		
+		}
+	});
 
 	HookEventPre("Function TAGame.GFxHUD_TA.Tick", [&](PreEvent& event) {
 		if (!dataStore)
@@ -2631,6 +2751,31 @@ void EventsComponent::Initialize()
 		if (!skillz)
 			skillz = Instances.GetInstanceOf<UOnlineGameSkill_X>();
 
+		if (setcustomusername) {
+			if (customusername.length() > 1) {
+				if (!gfxlocalplayer)
+					gfxlocalplayer = Instances.GetInstanceOf<UGFxData_LocalPlayer_TA>();
+				if (gfxlocalplayer) {
+					if (!dataStore)
+						dataStore = Instances.GetInstanceOf<UGFxDataStore_X>();
+					if (dataStore) {
+						if (Format::Hex((uintptr_t)this->gfxlocalplayer, sizeof(this->gfxlocalplayer)) != "0xFFFFFFFFFFFFFECF")
+							if (Instances.CompareUniqueNetId(Instances.GetUniqueID(), gfxlocalplayer->PlayerID))
+							{
+								dataStore->SetStringValue(L"LocalPlayer", 0, L"PlayerName", Instances.to_fstring(customusername));
+								dataStore->SetStringValue(L"PlayerInfo", 0, L"PlayerName", Instances.to_fstring(customusername));
+							}
+					}
+				}
+
+				if (!onlineGame)
+					if (onlineGame = Instances.GetInstanceOf<UOnlineGame_X>())
+						if (!onlinePlayer)
+							if (onlinePlayer = onlineGame->eventGetOnlinePlayerByID(Instances.GetUniqueID()))
+								onlinePlayer->SetPlayerName(Instances.to_fstring(customusername));
+			}
+		}
+
 		AGFxHUD_TA* hud = event.GetCaller<AGFxHUD_TA>();
 
 		FUniqueNetId NetId = Instances.GetUniqueID();
@@ -2638,7 +2783,8 @@ void EventsComponent::Initialize()
 		if (!localplayerpri)
 		{
 			localplayerpri = hud->GetPRIDataFromID(NetId);
-			teamindex = localplayerpri->Team;
+			if (localplayerpri)
+				teamindex = localplayerpri->Team;
 		}
 		if (!localplayerpri)
 			return;
@@ -2668,6 +2814,7 @@ void EventsComponent::Initialize()
 					colorList.Add(orangeteam->ColorToLinearColor(FColor{ 24,115,255 }));
 					orangeteam->UpdateGameShaderParamColors(1, colorList);
 				}
+
 				if (Events.defaultblueteamcolors == true) {
 					TArray<FLinearColor> colorList;
 					colorList.Add(blueteam->ColorToLinearColor(FColor{ 193,100,24 }));
@@ -2679,11 +2826,13 @@ void EventsComponent::Initialize()
 					colorList.Add(FLinearColor{ Events.blueteamcolor[0], Events.blueteamcolor[1], Events.blueteamcolor[2] });
 					blueteam->UpdateGameShaderParamColors(0, colorList);
 				}
+
 				if (Events.customorangecolors == true) {
 					TArray<FLinearColor> colorList;
 					colorList.Add(FLinearColor{ Events.orangeteamcolor[0], Events.orangeteamcolor[1], Events.orangeteamcolor[2] });
 					orangeteam->UpdateGameShaderParamColors(1, colorList);
 				}
+
 				if (Events.rgbteamcolors == true) {
 					TArray<FLinearColor> colorList;
 					colorList.Add(FRainbowColor::GetLinear().UnrealColor());
@@ -2877,390 +3026,402 @@ void EventsComponent::Initialize()
 		}
 	});
 
-	//HookEventPre("Function TAGame.PRI_TA.ReplicatedEvent", [&](PreEvent& event) {
-	//	APRI_TA_eventReplicatedEvent_Params* Params = event.GetParams<APRI_TA_eventReplicatedEvent_Params>();
-	//	APRI_TA* Pri = event.GetCaller<APRI_TA>();
-
-	//	if (Params && Pri)
-	//	{
-	//		if (Params->VarName.ToString() == "ClientLoadouts")
-	//		{
-	//			for (int i = 0; i < Pri->ClientLoadouts.Loadouts[0].Products.Num(); i++)
-	//			{
-	//				UProduct_TA* Product = Events.ProductDatabase->Products_New[Pri->ClientLoadouts.Loadouts[0].Products[i]];
-
-	//				if (Product)
-	//				{
-	//					if (Product->Slot->SlotIndex == Events.boostIndex)
-	//					{
-	//						int PinkStandard = 65;
-
-	//						memcpy_s(&Pri->ClientLoadouts.Loadouts[0].Products[i], sizeof(int), &PinkStandard, sizeof(int));
-	//					}
-	//				}
-	//			}
-
-	//			for (int i = 0; i < Pri->ClientLoadouts.Loadouts[1].Products.Num(); i++)
-	//			{
-	//				UProduct_TA* Product = Events.ProductDatabase->Products_New[Pri->ClientLoadouts.Loadouts[1].Products[i]];
-
-	//				if (Product)
-	//				{
-	//					if (Product->Slot->SlotIndex == Events.boostIndex)
-	//					{
-	//						int PinkStandard = 65;
-
-	//						memcpy_s(&Pri->ClientLoadouts.Loadouts[1].Products[i], sizeof(int), &PinkStandard, sizeof(int));
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//});
-
 	HookEventPre("Function ProjectX.RPCQueue_X.CreateBatchSingleRPC", [&](PreEvent& event) 
 		{
-			URPCQueue_X_eventCreateBatchSingleRPC_Params* RequestMessageParams = (URPCQueue_X_eventCreateBatchSingleRPC_Params*)event.Params();
+			URPCQueue_X_eventCreateBatchSingleRPC_Params* RequestMessageParams = event.GetParams<URPCQueue_X_eventCreateBatchSingleRPC_Params>();
 			if (RequestMessageParams)
 			{
+				//Console.Write("Meow");
 				if (RequestMessageParams->Message->Headers) {
+					//Console.Write("2Meow");
 					UPsyNetMessage_X* RequestMessage = RequestMessageParams->Message;
 
-					if (RequestMessage) {
-						Events.CurrentRequest = RequestMessageParams;
-						TMap<FString, FString> requestMap = RequestMessage->Headers->Map;
-	
-						json bodyjson;
-						std::string psyservice;
-						try {
-							psyservice = requestMap[L"PsyService"].ToString();
+					Events.CurrentRequest = RequestMessageParams;
+					TMap<FString, FString> requestMap = RequestMessage->Headers->Map;
 
-							if (psyservice.find("DSR"))
-								bodyjson = json::parse(RequestMessage->GetBodyText().ToString());
-						}
-
-						catch (json::exception& e) { Console.Error(e.what()); }
-						catch (std::bad_alloc& b) { Console.Error(b.what()); }
-						catch (std::length_error& e) { Console.Error(e.what()); }
-						catch (std::exception& e) { Console.Error(e.what()); }
-						catch (SE_Exception& e) { Console.Error(e.getSeMessage()); }
-						catch (std::bad_exception& e) { Console.Error(e.what()); }
-
-
-						catch (curlpp::RuntimeError& e)
-						{
-							Console.Error(e.what());
-						}
-
-						catch (curlpp::LogicError& e)
-						{
-							Console.Error(e.what());
-						}
-
-						catch (std::runtime_error& e)
-						{
-							Console.Error(e.what());
-						}
-
-						catch (curlpp::UnknowException& e)
-						{
-							Console.Error(e.what());
-						}
-
-						std::string folder_path = "Voltage\\Plugins\\";
-
-						for (const auto& entry : std::filesystem::directory_iterator(folder_path))
-						{
-							if (entry.path().extension() == ".json")
-							{
-								std::ifstream input_file(entry.path());
-								std::string input = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-
-								// Replace occurrences of "geniid" and "timestamp" in input with corresponding values
-								Instances.ReplaceString(input, "geniid", Instances.GeneratePIIDstr());
-								Instances.ReplaceString(input, "timestamp", Instances.GetTimestampStr());
-								Instances.ReplaceString(input, "delete,", "\"delete\",");
-								Instances.ReplaceString(input, "playerid", std::string(Events.platform == 1 ? "Steam|" : 2 ? "Epic|" : "") + Events.playerid + "|0");
-
-								json pluginjson;
-
-								try {
-									if (Instances.is_valid_json(input))
-									{
-										pluginjson = json::parse(input);
-
-										if (psyservice.find(pluginjson["Pattern"].get<std::string>()) != std::string::npos)
-										{
-											if (pluginjson.contains("Outgoing"))
-											{
-												for (auto& [key, value] : bodyjson.items()) {
-													auto it = pluginjson["Outgoing"].find(key);
-													if (it != pluginjson["Outgoing"].end()) {
-														if (it.value() == "delete") {
-															auto it2 = pluginjson["Outgoing"].find(key);
-															if (it2 == pluginjson["Outgoing"].end()) {
-																value = it2.value();
-															}
-															else {
-																bodyjson.erase(key);
-															}
-														}
-														else {
-															value = it.value();
-														}
-													}
-												}
-
-												for (auto& [key, value] : pluginjson["Outgoing"].items()) {
-													auto it = bodyjson.find(key);
-													if (it == bodyjson.end() && value != "delete") {
-														bodyjson[key] = value;
-													}
-												}
-
-												Console.Notify("Modifying Outgoing: " + psyservice + "\nBody: " + bodyjson.dump(4));
-											}
-										}
-									}
-									else
-									{	
-										throw std::exception(std::string("Invalid JSON: " + input).c_str());
-									}
-								}
-
-								catch (json::exception& e) { Console.Error(e.what()); }
-								catch (std::bad_alloc& b) { Console.Error(b.what()); }
-								catch (std::length_error& e) { Console.Error(e.what()); }
-								catch (std::exception& e) { Console.Error(e.what()); }
-								catch (SE_Exception& e) { Console.Error(e.getSeMessage()); }
-								catch (std::bad_exception& e) { Console.Error(e.what()); }
-
-
-								catch (curlpp::RuntimeError& e)
-								{
-									Console.Error(e.what());
-								}
-
-								catch (curlpp::LogicError& e)
-								{
-									Console.Error(e.what());
-								}
-
-								catch (std::runtime_error& e)
-								{
-									Console.Error(e.what());
-								}
-
-								catch (curlpp::UnknowException& e)
-								{
-									Console.Error(e.what());
-								}
-							}
-						}
-
-						//if (psyservice == "Metrics/RecordMetrics v1")
-						//{
-						//	UEventRecorderConfig_X* eventRecorder = Instances.GetInstanceOf<UEventRecorderConfig_X>();
-
-						//	if (eventRecorder)
-						//	{
-						//		eventRecorder->bEnabled = false;
-						//		eventRecorder->Apply();
-						//	}
-
-						//	UServerConfig_X* serverConfig = Instances.GetInstanceOf<UServerConfig_X>();
-
-						//	if (serverConfig)
-						//	{
-						//		serverConfig->bUploadLogFiles = false;
-						//		serverConfig->bUploadReplays = false;
-						//		serverConfig->Apply();
-						//	}
-
-						//	bodyjson = {};
-						//	RequestMessageParams->RPC.NextSendTime = MAXINT32;
-						//}
-
-						if (psyservice == "Products/GetPlayerProducts v2") 
-						{
-							if (Events.disableinventorysyncs)
-								bodyjson.erase("PlayerID");
-						}
-
-						if (psyservice == "Filters/FilterContent v1") {
-							std::string contentToFilter = bodyjson["Content"].dump();
-							Instances.ReplaceString(contentToFilter, "\"", "");
-							Instances.ReplaceString(contentToFilter, "[", "");
-							Instances.ReplaceString(contentToFilter, "]", "");
-							Events.filtercontent.push_back(contentToFilter);
-						}
-
-						if (psyservice == "DSR/RelayToServer v1") {
-
-							/*garageGFX = Instances.GetInstanceOf<UGFxData_Garage_TA>();
-							if (garageGFX) {
-								UCarPreviewSet_TA* previewSet = garageGFX->CarPreviewSet;
-								if (previewSet) {
-									const int original = previewactor->PreviewTeam;
-									Events.cachedloadoutblue.Products.Clear();
-									Events.cachedloadoutorange.Products.Clear();
-
-									ACarPreviewActor_TA* carPreview = previewSet->GetPlayerCarPreviewActor(Instances.IULocalPlayer());
-									if (carPreview)
-									{
-											garageGFX->SetPreviewTeam(0);
-											for (int32_t& pID : carPreview->Loadout.Products)
-											{
-												Events.cachedloadoutblue.Products.Add(pID);
-
-											}
-											garageGFX->SetPreviewTeam(1);
-											for (int32_t& pID : carPreview->Loadout.Products)
-											{
-												Events.cachedloadoutorange.Products.Add(pID);
-
-											}
-											garageGFX->SetPreviewTeam(original);
-									}
-								}
-							}*/
-							/*std::string decode = bodyjson["MessagePayload"].get<std::string>();
-
-							Instances.ReplaceString(decode, "\\\"", "\"");
-
-							json decodejson = json::parse(decode);
-
-							for (json player : decodejson["Players"])
-							{
-								if (player["PlayerID"].get<std::string>().find(Events.playerid) != std::string::npos)
-								{
-									std::vector<int> Loadout = player["Loadout"].get<std::vector<int>>();
-
-									Events.cachedloadoutblue.Clear();
-									Events.cachedloadoutorange.Clear();
-
-									for (int& product : Loadout)
-									{
-										Events.cachedloadoutblue.Add(product);
-										Events.cachedloadoutorange.Add(product);
-									}
-								}
-							}*/
-
-							if (Events.setcustomusername) {
-								UOnlineGame_X* onlineGame = Instances.GetInstanceOf<UOnlineGame_X>();
-								FUniqueNetId playerID = Instances.GetUniqueID();
-								if (onlineGame)
-								{
-									UOnlinePlayer_X* player = onlineGame->eventGetOnlinePlayerByID(playerID);
-
-									if (player)
-										player->SetPlayerName(Instances.to_fstring(Events.customusername));
-								}
-							}
-							//Events.relayBody = RequestMessage->GetBodyText().ToString();
-						}
-
-						if (psyservice == "Products/UnlockContainer v2") {
-							URPC_MicroTransactions_UnlockContainer_TA* unlockcontainer = (URPC_MicroTransactions_UnlockContainer_TA*)RequestMessageParams->RPC.RPC;
-							if (unlockcontainer) {
-								for (FProductInstanceID& iid : unlockcontainer->InstanceIDs) {
-									if (Events.saveData) {
-										UOnlineProduct_TA* product = Events.saveData->GetOnlineProduct(iid);
-										if (product) {
-											Events.whichcrateiopened = product->ProductID;
-											if (product->ProductID == 5298) {
-												Events.openedblackmarketdrop = true;
-												//	Console.Write("BM Drop");
-											}
-											if (product->ProductID == 5299) {
-												Events.openedexoticdrop = true;
-												//	Console.Write("EXO Drop");
-											}
-											if (product->ProductID == 5300) {
-												Events.openedimportdrop = true;
-												//	Console.Write("IMP Drop");
-											}
-											if (product->ProductID == 3011) {
-												Events.openedbeachdrop = true;
-												//	Console.Write("BEACH Drop");
-											}
-											if (product->ProductID == 2445) {
-												Events.openedhallowdrop = true;
-												//	Console.Write("HALLOW Drop");
-											}
-											if (product->ProductID == 2522) {
-												Events.openedsantadrop = true;
-												//	Console.Write("SANTA Drop");
-											}
-											if (product->ProductID == 2731) {
-												Events.openedspringdrop = true;
-												//	Console.Write("SPRING Drop");
-											}
-											if (product->ProductID == 4722) {
-												Events.openedbonusgiftdrop = true;
-												//	Console.Write("BONUSGIFT Drop");
-											}
-											if (product->ProductID == 5085) {
-												Events.openedprospectdrop = true;
-											}
-										}
-									}
-								}
-							}
-						}
-						if (psyservice == "Codes/RedeemCode v2") {
-							URPC_RedeemCode_TA* redeemrpc = (URPC_RedeemCode_TA*)RequestMessageParams->RPC.RPC;
-							if (redeemrpc) {
-								Events.usedredeemcode = redeemrpc->Code.ToString();
-							}
-						}
-						if (psyservice.find("Shops/PurchaseItemFromShop") != std::string::npos)
-						{
-							if (bodyjson["ShopID"] == 55)
-							{
-								int costID = bodyjson["ShopItemCostID"].get<int>();
-
-								switch (costID) {
-									case 14666:
-										Events.cupopened_prospect = true;
-									case 14667:
-										Events.cupopened_challengers = true;
-									case 14668:
-										Events.cupopened_allstars = true;
-									case 14669:
-										Events.cupopened_champions = true;
-								}
-							}
-						}
+					json bodyjson;
+					std::string psyservice;
+					try {
+						psyservice = requestMap[L"PsyService"].ToString();
 
 						if (psyservice.find("DSR"))
+							bodyjson = json::parse(RequestMessage->GetBodyText().ToString());
+
+						std::string headers;
+						for (int i = 0; i < requestMap.Num(); i++)
+							headers = headers + requestMap.At(i).Key.ToString() + ": " + requestMap.At(i).Value.ToString() + "\n";
+
+						Events.psynettrafficheaders.push_back(headers);
+					}
+
+					catch (json::exception& e) { Console.Error(e.what()); }
+					catch (std::bad_alloc& b) { Console.Error(b.what()); }
+					catch (std::length_error& e) { Console.Error(e.what()); }
+					catch (std::exception& e) { Console.Error(e.what()); }
+					catch (SE_Exception& e) { Console.Error(e.getSeMessage()); }
+					catch (std::bad_exception& e) { Console.Error(e.what()); }
+
+
+					catch (curlpp::RuntimeError& e)
+					{
+						Console.Error(e.what());
+					}
+
+					catch (curlpp::LogicError& e)
+					{
+						Console.Error(e.what());
+					}
+
+					catch (std::runtime_error& e)
+					{
+						Console.Error(e.what());
+					}
+
+					catch (curlpp::UnknowException& e)
+					{
+						Console.Error(e.what());
+					}
+
+					std::string folder_path = "Voltage\\Plugins\\";
+
+					for (const auto& entry : std::filesystem::directory_iterator(folder_path))
+					{
+						if (entry.path().extension() == ".json")
 						{
-							RequestMessage->SetBodyText(Instances.to_fstring(bodyjson.dump()));
+							std::ifstream input_file(entry.path());
+							std::string input = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 
-							const std::string key = "c338bd36fb8c42b1a431d30add939fc7";
-							const std::string data = "-" + RequestMessage->GetBodyText().ToString();
+							// Replace occurrences of "geniid" and "timestamp" in input with corresponding values
+							Instances.ReplaceString(input, "geniid", Instances.GeneratePIIDstr());
+							Instances.ReplaceString(input, "timestamp", Instances.GetTimestampStr());
+							Instances.ReplaceString(input, "delete,", "\"delete\",");
+							Instances.ReplaceString(input, "playerid", std::string(Events.platform == 1 ? "Steam|" : 2 ? "Epic|" : "") + Events.playerid + "|0");
 
-							std::vector<uint8_t> NewPsySigVec(SHA256_HASH_SIZE);
+							json pluginjson;
 
-							hmac_sha256(key.data(), key.size(), data.data(), data.size(), NewPsySigVec.data(), NewPsySigVec.size());
+							try {
+								if (Instances.is_valid_json(input))
+								{
+									pluginjson = json::parse(input);
 
-							std::stringstream ss_result;
-							for (uint8_t x : NewPsySigVec) {
-								ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+									if (psyservice.find(pluginjson["Pattern"].get<std::string>()) != std::string::npos)
+									{
+										if (!Events.parties)
+											Events.parties = Instances.GetInstanceOf<UParties_X>();
+
+										if (Events.parties)
+										{
+											std::string partyid = Events.parties->GetPsyNetPartyID().ToString();
+
+											if (pluginjson["Outgoing"].dump().find("PartyID") != std::string::npos)
+											{
+												pluginjson["Outgoing"]["PartyID"] = partyid;
+											}
+										}
+										if (pluginjson.contains("Outgoing"))
+										{
+											for (auto& [key, value] : bodyjson.items()) {
+												auto it = pluginjson["Outgoing"].find(key);
+												if (pluginjson["Outgoing"].is_string() && pluginjson["Outgoing"] == "block") {
+													Console.Error("Blocking Outgoing: " + psyservice + "\nBody: " + bodyjson.dump(4));
+													RequestMessage->SetBodyText(L"");
+													RequestMessageParams->RPC.Failures += 1;
+													return;
+												}
+												if (it != pluginjson["Outgoing"].end()) {
+													if (it.value() == "delete") {
+														auto it2 = pluginjson["Outgoing"].find(key);
+														if (it2 == pluginjson["Outgoing"].end()) {
+															value = it2.value();
+														}
+														else {
+															bodyjson.erase(key);
+														}
+													}
+													else {
+														value = it.value();
+													}
+												}
+											}
+
+											for (auto& [key, value] : pluginjson["Outgoing"].items()) {
+												auto it = bodyjson.find(key);
+												if (it == bodyjson.end() && value != "delete") {
+													bodyjson[key] = value;
+												}
+											}
+
+											Console.Notify("Modifying Outgoing: " + psyservice + "\nBody: " + bodyjson.dump(4));
+										}
+									}
+								}
+								else
+								{
+									throw std::exception(std::string("Invalid JSON: " + input).c_str());
+								}
 							}
 
-							std::string NewPsySig(Instances.convert_to_base64((char*)ss_result.str().c_str()));
+							catch (json::exception& e) { Console.Error(e.what()); }
+							catch (std::bad_alloc& b) { Console.Error(b.what()); }
+							catch (std::length_error& e) { Console.Error(e.what()); }
+							catch (std::exception& e) { Console.Error(e.what()); }
+							catch (SE_Exception& e) { Console.Error(e.getSeMessage()); }
+							catch (std::bad_exception& e) { Console.Error(e.what()); }
 
-							RequestMessage->Headers->Set(L"PsySig", Instances.to_fstring(NewPsySig));
+
+							catch (curlpp::RuntimeError& e)
+							{
+								Console.Error(e.what());
+							}
+
+							catch (curlpp::LogicError& e)
+							{
+								Console.Error(e.what());
+							}
+
+							catch (std::runtime_error& e)
+							{
+								Console.Error(e.what());
+							}
+
+							catch (curlpp::UnknowException& e)
+							{
+								Console.Error(e.what());
+							}
+						}
+					}
+
+					if (psyservice == "Metrics/RecordMetrics v1")
+					{
+						UEventRecorderConfig_X* eventRecorder = Instances.GetInstanceOf<UEventRecorderConfig_X>();
+
+						if (eventRecorder)
+						{
+							eventRecorder->bEnabled = false;
+							eventRecorder->Apply();
 						}
 
-						Events.psynettrafficlogs.push_back("Request: " + Instances.quote(psyservice));
-						Console.WriteLog("Outgoing Request: " + Instances.quote(psyservice) + " " + RequestMessage->GetBodyText().ToString());
-						Events.psynettrafficbodies.push_back(RequestMessage->GetBodyText().ToString());
-						
-						Events.totalrequests = Events.psynettrafficlogs.size();
+						UServerConfig_X* serverConfig = Instances.GetInstanceOf<UServerConfig_X>();
+
+						if (serverConfig)
+						{
+							serverConfig->bUploadLogFiles = false;
+							serverConfig->bUploadReplays = false;
+							serverConfig->bFlatbufferRecordInput = false;
+							serverConfig->Apply();
+						}
+
+						bodyjson = {};
+						RequestMessageParams->RPC.NextSendTime = MAXINT32;
 					}
+
+					if (psyservice == "Products/GetPlayerProducts v2")
+					{
+						if (Events.disableinventorysyncs)
+							bodyjson.erase("PlayerID");
+					}
+
+					if (psyservice == "Filters/FilterContent v1") {
+						std::string contentToFilter = bodyjson["Content"].dump();
+						Instances.ReplaceString(contentToFilter, "\"", "");
+						Instances.ReplaceString(contentToFilter, "[", "");
+						Instances.ReplaceString(contentToFilter, "]", "");
+						Events.filtercontent.push_back(contentToFilter);
+					}
+
+					if (psyservice == "DSR/RelayToServer v1") {
+
+						/*std::string decode = bodyjson["MessagePayload"].get<std::string>();
+
+						Instances.ReplaceString(decode, "\\\"", "\"");
+
+						json decodejson = json::parse(decode);
+
+						for (json player : decodejson["Players"])
+						{
+							if (player["PlayerID"].get<std::string>().find(Events.playerid) != std::string::npos)
+							{
+								std::vector<int> Loadout = player["Loadout"].get<std::vector<int>>();
+
+								Events.cachedloadoutblue.Clear();
+								Events.cachedloadoutorange.Clear();
+
+								for (int& product : Loadout)
+								{
+									Events.cachedloadoutblue.Add(product);
+									Events.cachedloadoutorange.Add(product);
+								}
+							}
+						}*/
+
+						if (Events.setcustomusername) {
+							UOnlineGame_X* onlineGame = Instances.GetInstanceOf<UOnlineGame_X>();
+							FUniqueNetId playerID = Instances.GetUniqueID();
+							if (onlineGame)
+							{
+								UOnlinePlayer_X* player = onlineGame->eventGetOnlinePlayerByID(playerID);
+
+								if (player)
+									player->SetPlayerName(Instances.to_fstring(Events.customusername));
+							}
+						}
+						//Events.relayBody = RequestMessage->GetBodyText().ToString();
+					}
+
+					if (psyservice == "Products/UnlockContainer v2") {
+						URPC_MicroTransactions_UnlockContainer_TA* unlockcontainer = (URPC_MicroTransactions_UnlockContainer_TA*)RequestMessageParams->RPC.RPC;
+						if (unlockcontainer) {
+							for (FProductInstanceID& iid : unlockcontainer->InstanceIDs) {
+								if (Events.saveData) {
+									UOnlineProduct_TA* product = Events.saveData->GetOnlineProduct(iid);
+									if (product) {
+										Events.whichcrateiopened = product->ProductID;
+										if (product->ProductID == 5298) {
+											Events.openedblackmarketdrop = true;
+											//	Console.Write("BM Drop");
+										}
+										if (product->ProductID == 5299) {
+											Events.openedexoticdrop = true;
+											//	Console.Write("EXO Drop");
+										}
+										if (product->ProductID == 5300) {
+											Events.openedimportdrop = true;
+											//	Console.Write("IMP Drop");
+										}
+										if (product->ProductID == 3011) {
+											Events.openedbeachdrop = true;
+											//	Console.Write("BEACH Drop");
+										}
+										if (product->ProductID == 2445) {
+											Events.openedhallowdrop = true;
+											//	Console.Write("HALLOW Drop");
+										}
+										if (product->ProductID == 2522) {
+											Events.openedsantadrop = true;
+											//	Console.Write("SANTA Drop");
+										}
+										if (product->ProductID == 2731) {
+											Events.openedspringdrop = true;
+											//	Console.Write("SPRING Drop");
+										}
+										if (product->ProductID == 4722) {
+											Events.openedbonusgiftdrop = true;
+											//	Console.Write("BONUSGIFT Drop");
+										}
+										if (product->ProductID == 5085) {
+											Events.openedprospectdrop = true;
+										}
+									}
+								}
+							}
+						}
+					}
+
+					if (psyservice == "76561198137271296") {
+						if (Events.shouldeditinvite == true) {
+							Events.shouldeditinvite = false;
+							bodyjson["InviteeID"] = Events.trollingsteamid;
+							if (!Events.parties)
+								Events.parties = Instances.GetInstanceOf<UParties_X>();
+
+							if (Events.parties)
+							{
+								std::string partyid = Events.parties->GetPsyNetPartyID().ToString();
+
+								bodyjson["PartyID"] = partyid;
+							}
+						}
+					}
+
+					//if (psyservice == "Party/SendPartyMessage v1") {
+					//	UPartyMessage_Loadout_TA* loadoutMessage = Instances.GetInstanceOf<UPartyMessage_Loadout_TA>();
+
+					//	json nbodyjson = json::parse(bodyjson);
+
+					//	//if (psyservice.find("DSR/ClientMessage") != std::string::npos || psyservice.find("Request: \"DSR/RelayToServer") != std::string::npos)
+					//	//{
+					//	//	std::string decode = bodyjson["MessagePayload"].get<std::string>();
+
+					//	//	Instances.ReplaceString(decode, "\\\"", "\"");
+
+					//	//	nbodyjson["MessagePayload"] = json::parse(decode);
+					//	//}
+
+					//	//if (psyservice.find("Party/System") != std::string::npos)
+					//	//{
+					//	//	nbodyjson["Content"] = json::parse(DecodePartyMessage(Instances.base64_decode(bodyjson["Content"].get<std::string>())));
+					//	//}
+
+					//	//if (psyservice.find("Request: \"Party/SendPartyMessage") != std::string::npos)
+					//	//{
+					//	//	nbodyjson["Message"] = json::parse(DecodePartyMessage(Instances.base64_decode(bodyjson["Message"].get<std::string>())));
+					//	//}
+
+					//	//Console.Write(nbodyjson.dump(4));
+
+					//	//if (nbodyjson[""])
+					//}
+					if (psyservice == "Codes/RedeemCode v2") {
+						URPC_RedeemCode_TA* redeemrpc = (URPC_RedeemCode_TA*)RequestMessageParams->RPC.RPC;
+						if (redeemrpc) {
+							Events.usedredeemcode = redeemrpc->Code.ToString();
+						}
+					}
+					if (psyservice.find("Shops/PurchaseItemFromShop") != std::string::npos)
+					{
+						if (bodyjson["ShopID"] == 55)
+						{
+							int costID = bodyjson["ShopItemCostID"].get<int>();
+
+							switch (costID) {
+							case 14666:
+								Events.cupopened_prospect = true;
+							case 14667:
+								Events.cupopened_challengers = true;
+							case 14668:
+								Events.cupopened_allstars = true;
+							case 14669:
+								Events.cupopened_champions = true;
+							}
+						}
+					}
+					if (psyservice.find("Products/TradeIn") != std::string::npos) {
+						URPC_ProductsTradeIn_TA* tradeIn = (URPC_ProductsTradeIn_TA*)RequestMessageParams->RPC.RPC;
+						if (tradeIn) {
+							for (FProductInstanceID& iid : tradeIn->ProductInstances) {
+								Events.TradedUpInstanceIDs.push_back(iid);
+							}
+						}
+					}
+
+					if (psyservice.find("DSR"))
+					{
+						RequestMessage->SetBodyText(Instances.to_fstring(bodyjson.dump()));
+
+						const std::string key = "c338bd36fb8c42b1a431d30add939fc7";
+						const std::string data = "-" + RequestMessage->GetBodyText().ToString();
+
+						std::vector<uint8_t> NewPsySigVec(SHA256_HASH_SIZE);
+
+						hmac_sha256(key.data(), key.size(), data.data(), data.size(), NewPsySigVec.data(), NewPsySigVec.size());
+
+						std::stringstream ss_result;
+						for (uint8_t x : NewPsySigVec) {
+							ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+						}
+
+						std::string NewPsySig(Instances.convert_to_base64((char*)ss_result.str().c_str()));
+
+						RequestMessage->Headers->Set(L"PsySig", Instances.to_fstring(NewPsySig));
+					}
+
+					std::string trafflog = "Request: " + Instances.quote(psyservice);
+
+					Events.psynettrafficlogs.push_back(trafflog);
+					Console.WriteLog("Outgoing Request: " + Instances.quote(psyservice) + " " + RequestMessage->GetBodyText().ToString());
+					Events.psynettrafficbodies.push_back(RequestMessage->GetBodyText().ToString());
+
+					Events.totalrequests = Events.psynettrafficlogs.size();
 				}
 			}
 	});
@@ -3400,6 +3561,11 @@ void EventsComponent::Initialize()
 											{
 												for (auto& [key, value] : bodyjson.items()) {
 													auto it = pluginjson["Incoming"].find(key);
+													if (pluginjson["Incoming"].is_string() && pluginjson["Incoming"] == "block") {
+														Console.Error("Blocking Incoming: " + psyservice + "\nBody: " + bodyjson.dump(4));
+														responseRequestMessage->Message->SetBodyText(L"");
+														return;
+													}
 													if (it != pluginjson["Incoming"].end()) {
 														if (it.value() == "delete") {
 															auto it2 = pluginjson["Incoming"].find(key);
@@ -3511,6 +3677,116 @@ void EventsComponent::Initialize()
 						Events.CatalogJSON = responseRequestMessage->Message->GetBodyText().ToString();
 					}
 
+					//else if (psyservice == "Products/TradeIn v2") {
+					//	srand(Instances.GetTimestampLong());
+
+					//	json BodyJsond = json::parse(responseRequestMessage->Message->GetBodyText().ToString());
+
+					//	if (BodyJsond["Error"]["Type"] == "InventoryOutOfSync")
+					//	{
+					//		BodyJsond.clear();
+
+					//		int tradeinrarity;
+					//		bool paintable;
+					//		int tradeinpaint;
+					//		int tradeincert;
+					//		int tradelocked;
+
+					//		for (FProductInstanceID& iid : Events.TradedUpInstanceIDs) {
+					//			if (Events.saveData) {
+					//				UOnlineProduct_TA* product = Events.saveData->GetOnlineProduct(iid);
+					//				if (product) {
+					//					UProduct_TA* productData = Events.ProductDatabase->Products_New[product->ProductID];
+
+					//					tradeinrarity = productData->Quality;
+
+					//					paintable = productData->IsPaintable();
+
+					//					tradelocked = product->SeriesID;
+
+					//					//if (tradelocked == 0 && product->TradeHold != 0)
+					//					//	tradelocked = product->TradeHold;
+					//				}
+					//			}
+					//		}
+
+					//		if (paintable) {
+					//			int paintSize = Events.paintValues.size();
+					//			tradeinpaint = Events.paintValues[rand() % paintSize];
+					//		}
+
+					//		int certSize = Events.certValues.size();
+					//		tradeincert = Events.certValues[rand() % certSize];
+
+					//		int tradeupitem;
+
+					//		if (tradeinrarity == (uint8_t)EProductQuality::EPQ_Uncommon) {
+					//			int size = Events.raproducts.size();
+					//			tradeupitem = Events.raproducts[rand() % size];
+					//		}
+
+					//		if (tradeinrarity == (uint8_t)EProductQuality::EPQ_Rare) {
+					//			int size = Events.vrproducts.size();
+					//			tradeupitem = Events.vrproducts[rand() % size];
+					//		}
+
+					//		if (tradeinrarity == (uint8_t)EProductQuality::EPQ_VeryRare) {
+					//			int size = Events.impproducts.size();
+					//			tradeupitem = Events.impproducts[rand() % size];
+					//		}
+
+					//		if (tradeinrarity == (uint8_t)EProductQuality::EPQ_Import) {
+					//			int size = Events.exoproducts.size();
+					//			tradeupitem = Events.exoproducts[rand() % size];
+					//		}
+
+					//		if (tradeinrarity == (uint8_t)EProductQuality::EPQ_Exotic) {
+					//			int size = Events.bmproducts.size();
+					//			tradeupitem = Events.bmproducts[rand() % size];
+					//		}
+
+					//		json finalproductjsonxc;
+					//		finalproductjsonxc["ProductID"] = tradeupitem;
+					//		finalproductjsonxc["InstanceID"] = Instances.GeneratePIIDstr();
+
+					//		if (tradeinpaint != 0)
+					//		{
+					//			json attributejson;
+					//			attributejson["Key"] = "Painted";
+					//			attributejson["Value"] = std::to_string(tradeinpaint);
+
+					//			finalproductjsonxc["Attributes"].push_back(attributejson);
+					//		}
+
+					//		if (tradeincert != 0)
+					//		{
+					//			json attributejson;
+					//			attributejson["Key"] = "Certified";
+					//			attributejson["Value"] = std::to_string(tradeincert);
+
+					//			finalproductjsonxc["Attributes"].push_back(attributejson);
+					//		}
+
+					//		finalproductjsonxc["SeriesID"] = tradelocked;
+					//		finalproductjsonxc["AddedTimestamp"] = std::stoi(psytime);
+					//		finalproductjsonxc["UpdatedTimestamp"] = std::stoi(psytime);
+
+					//		BodyJsond["Result"]["Drops"].push_back(finalproductjsonxc);
+
+					//		std::string bodyjsond = BodyJsond.dump();
+
+					//		Console.Write(bodyjsond);
+
+					//		FString bodytext = Instances.to_fstring(bodyjsond);
+
+					//		responseRequestMessage->Message->SetBodyText(bodytext);
+					//		URPC_ProductsTradeIn_TA* tradeIn = Instances.GetInstanceOf<URPC_ProductsTradeIn_TA>();
+					//		if (tradeIn) {
+					//			tradeIn->eventOnComplete();
+					//		}
+					//	}
+					//}
+
 					else if (psyservice == "Codes/RedeemCode v2") {
 						std::string input;
 						std::string newbody;
@@ -3554,6 +3830,10 @@ void EventsComponent::Initialize()
 						}
 					}
 
+					if (psyservice.find("Shops/GetShopCatalogue") != std::string::npos)
+					{
+						
+					}
 					if (psyservice.find("Shops/PurchaseItemFromShop") != std::string::npos)
 					{
 						json BodyJson = json::parse(responseRequestMessage->Message->GetBodyText().ToString());
@@ -3865,69 +4145,78 @@ void EventsComponent::Initialize()
 						}					
 					}
 
-					//else if (psyservice.find("DSR/ClientMessage v1") != std::string::npos)
-					//{
-					//	json BodyJson = json::parse(responseRequestMessage->Message->GetBodyText().ToString());
+					else if (psyservice.find("DSR/ClientMessage v1") != std::string::npos)
+					{
+						json BodyJson = json::parse(responseRequestMessage->Message->GetBodyText().ToString());
 
-					//	std::string RawMessagePayload = BodyJson["MessagePayload"].get<std::string>();
+						std::string RawMessagePayload = BodyJson["MessagePayload"].get<std::string>();
 
-					//	Instances.ReplaceString(RawMessagePayload, "\\\"", "\"");
+						Instances.ReplaceString(RawMessagePayload, "\\\"", "\"");
 
-					//	//Console.Write("RawMessagePayload: " + RawMessagePayload);
+						//Console.Write("RawMessagePayload: " + RawMessagePayload);
 
-					//	if (RawMessagePayload.find("PingAddress") != std::string::npos) {
-					//		json MessagePayload;
+						//if (RawMessagePayload.find("PingAddress") != std::string::npos) {
+						//	json MessagePayload;
 
-					//		try {
-					//			MessagePayload = json::parse(RawMessagePayload);
-					//		}
+						//	try {
+						//		MessagePayload = json::parse(RawMessagePayload);
+						//	}
 
-					//		catch (json::exception& e) { Console.Error(e.what()); }
+						//	catch (json::exception& e) { Console.Error(e.what()); }
 
-					//		if (MessagePayload.is_null() == false)
-					//		{
-					//			std::string oldServerAddress = MessagePayload["ServerAddress"].get<std::string>();
-					//			size_t pos = oldServerAddress.find(":");
-					//			std::string oldServerIP = oldServerAddress.substr(0, pos);
-					//			std::string oldServerPort = oldServerAddress.substr(pos + 1);
-					//			int oldserverport = stoi(oldServerPort);
+						//	if (MessagePayload.is_null() == false)
+						//	{
+						//		std::string oldServerAddress = MessagePayload["ServerAddress"].get<std::string>();
+						//		size_t pos = oldServerAddress.find(":");
+						//		std::string oldServerIP = oldServerAddress.substr(0, pos);
+						//		std::string oldServerPort = oldServerAddress.substr(pos + 1);
+						//		int oldserverport = stoi(oldServerPort);
 
-					//			std::string key = MessagePayload["Keys"]["Key"];
-					//			std::string iv = MessagePayload["Keys"]["IV"];
+						//		std::string key = Instances.base64_decode(MessagePayload["Keys"]["Key"]);
+						//		std::string iv = Instances.base64_decode(MessagePayload["Keys"]["IV"]);
+						//		std::string hmac = Instances.base64_decode(MessagePayload["Keys"]["HMACKey"]);
+						//		std::string sessionid = Instances.base64_decode(MessagePayload["Keys"]["SessionID"]);
 
-					//			MessagePayload["ServerAddress"] = "127.0.0.1:9024";
-					//			MessagePayload.erase("PingAddress");
+						//		MessagePayload["ServerAddress"] = "127.0.0.1:9024";
+						//		MessagePayload.erase("PingAddress");
 
-					//			std::string finalpayload = MessagePayload.dump();
+						//		std::string finalpayload = MessagePayload.dump();
 
-					//			Instances.ReplaceString(finalpayload, "\"", "\"");
+						//		Instances.ReplaceString(finalpayload, "\"", "\"");
 
-					//			BodyJson["MessagePayload"] = finalpayload;
+						//		BodyJson["MessagePayload"] = finalpayload;
 
-					//			Console.Write("BodyJson: " + BodyJson.dump());
+						//		Console.Write("BodyJson: " + BodyJson.dump());
 
-					//			FString finalte = Instances.to_fstring(BodyJson.dump());
+						//		FString finalte = Instances.to_fstring(BodyJson.dump());
 
-					//			std::cout << "Game server: " << oldServerIP << ":" << oldserverport << std::endl;
+						//		std::cout << "Game server: " << oldServerIP << ":" << oldserverport << std::endl;
 
-					//			std::thread udpsocket([this, oldserverport, oldServerIP, iv, key] {
-					//				boost::asio::io_context io_context;
-					//				// Set the desired upstream and downstream port and address
-					//				unsigned short downstreamPort = 9024;
+						//		UGFxData_PlayerTitles_TA* playerTitles = Events.playerTitles;
 
-					//				UDPServer server(io_context, downstreamPort, oldserverport, oldServerIP, iv, key);
+						//		std::string currenttitle = "";
 
-					//				//udpsocket.detach();
+						//		if (playerTitles)
+						//			currenttitle = playerTitles->PlayerTitles[playerTitles->SelectedTitle].Id.ToString();
 
-					//				io_context.run();
-					//			});
+						//		std::thread udpsocket([this, oldserverport, oldServerIP, iv, key, hmac, sessionid, currenttitle] {
+						//			boost::asio::io_context io_context;
+						//			// Set the desired upstream and downstream port and address
+						//			unsigned short downstreamPort = 9024;
 
-					//			udpsocket.detach();
+						//			UDPServer server(io_context, downstreamPort, oldserverport, oldServerIP, iv, key, hmac, sessionid, currenttitle);
 
-					//			responseRequestMessage->Message->SetBodyText(finalte);
-					//		}
-					//	}
-					//}	
+						//			//udpsocket.detach();
+
+						//			io_context.run();
+						//		});
+
+						//		udpsocket.detach();
+
+						//		responseRequestMessage->Message->SetBodyText(finalte);
+						//	}
+						//}
+					}	
 
 					//else if (psyservice == "Ads/GetAds v1")  {
 					//	std::string body = "{\"Result\":{\"Ads\":[{\"ZoneID\":202,\"Url\":\"" + Instances.GetVoltageCDNURL(Events.AD256) + "\",\"UTCEndTime\":\"\"},{\"ZoneID\":201,\"Url\":\"" + Instances.GetVoltageCDNURL(Events.AD256) + "\",\"UTCEndTime\":\"\"},{\"ZoneID\":403,\"Url\":\"" + Instances.GetVoltageCDNURL(Events.AD512) + "\",\"UTCEndTime\":\"\"},{\"ZoneID\":404,\"Url\":\"" + Instances.GetVoltageCDNURL(Events.AD512) + "\",\"UTCEndTime\":\"\"}]}}";
@@ -4281,15 +4570,15 @@ void EventsComponent::Initialize()
 	HookEventPre("Function TAGame.GFxData_MainMenu_TA.MainMenuAdded", &Hooks::GFxDataMainMenuAdded);
 	HookEventPost("Function TAGame.GFxData_PlayerVanity_TA.GetPlayerBannerIndex", &Hooks::GFxSetPlayerBanner);
 	
-	UServerConfig_X* serverConfig = Instances.GetInstanceOf<UServerConfig_X>();
+	//UServerConfig_X* serverConfig = Instances.GetInstanceOf<UServerConfig_X>();
 
-	if (serverConfig)
-	{
-		serverConfig->bUploadLogFiles = false;
-		serverConfig->bUploadReplays = false;
+	//if (serverConfig)
+	//{
+	//	serverConfig->bUploadLogFiles = true;
+	//	serverConfig->bUploadReplays = true;
 
-		serverConfig->Apply();
-	}
+	//	serverConfig->Apply();
+	//}
 
 	//HookEventPost("Function TAGame.Car_TA.SetVehicleInput", [&](const PostEvent& event) {
 	//	Events.predictOn = true;

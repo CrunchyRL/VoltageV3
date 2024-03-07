@@ -2,6 +2,7 @@
 #include "../Component.hpp"
 #include "../../nlohmann.hpp"
 #define CURL_STATICLIB
+#define RESULT_DECL void*const Result
 
 struct FFrame {
 	uint8_t Padding[24];
@@ -11,6 +12,11 @@ struct FFrame {
 	BYTE* Locals;
 	FFrame* Previous;
 	INT LineNum;
+};
+
+struct PlayerID {
+	std::string playerid;
+	bool bad = false;
 };
 
 #define RESULT_DECL void*const Result
@@ -57,6 +63,11 @@ public:
 
 public:
 	PostEvent operator=(const PostEvent& other);
+};
+
+struct JsonKeybindAssociation {
+    std::string jsonFilePath;
+    int keybind;
 };
 
 struct FCustomTitleData
@@ -272,6 +283,7 @@ private:
 	static inline bool Detoured;
 	static inline bool ProcessInternalDetoured;
 	static inline ProcessEventType ProcessEvent;
+	static inline ProcessInternalType ProcessInternal;
 	static inline uint64_t LastPreFunction;
 	static inline uint64_t LastPostFunction;
 	static inline std::map<uint32_t, std::vector<std::function<void(PreEvent&)>>> PreHookedEvents; // Hooked functions internal integer and bound function.
@@ -293,6 +305,7 @@ public:
 	std::vector<std::string> productlist;
 	std::vector<std::string> paintlists;
 	std::vector<std::string> qualitylists;
+	std::vector<FOnlineProductData> spawnedProducts;
 	std::vector<SSlotData> slotlists;
 	FVector oldcameralocation;
 	bool iswindowactive = false;
@@ -306,11 +319,18 @@ public:
 	int creditsAmount;
 	bool spawncredsrn = false;
 	int credsquantity = 0;
+	std::string webhookurl;
 	int currencyid = 13;
 	bool show_items_window = false;
+	bool startTASclip;
+	bool endTASclip;
+	bool recordingTASInput = false;
+	std::string currentTASRecording;
+	std::vector<JsonKeybindAssociation> TASassociations; // Store associations here
 	bool syncwallet = false;
 	int creditsID;
 	int amountofspawnedtourneycreds;
+	UParties_X* parties = nullptr;
 	//int titlered;
 	//int titlegreen;
 	//int titleblue;
@@ -338,9 +358,10 @@ public:
 	bool serversidedtitles = false;
 	bool setcustomtitle = false;
 	bool setcustomusername = false;
-    int version = 115;
+    int version = 117;
 	bool devmode = false;
 	bool needupdate = false;	
+	bool resetblackcar = false;
 	bool needtochangemenubg = false;	
 	URPCQueue_X* RPCQueue_X = nullptr;
 	std::vector<UOnlineProduct_TA*> spawnedItems;
@@ -426,6 +447,7 @@ public:
 	bool custompaintprimaries = false;
 	bool custompaintsecondaries = false;
 	bool hasresetpainttrim = false;
+	UProductUtil_TA* productUtil = nullptr;
 	bool hasresetpaintprimaries = false;
 	bool hasresetpaintsecondaries = false;
 	bool displayDeltaTime = false;
@@ -440,7 +462,6 @@ public:
 	bool refreshtitle = false;
 	bool spawneveryitempainted = false;
 	bool custombanners = false;
-	std::vector<UDPPacket> UDPMESSAGESTODESERIALIZE;
 	bool deserializeudpmessage;
 	UObjectSerializer_X* Serializer = nullptr;
 	int currentitleindex = 0;
@@ -535,8 +556,10 @@ public:
 	ULocalPlayer* localplayer = nullptr;
 	ACarPreviewActor_TA* previewactor = nullptr;
 	std::vector<std::string> extras;
-	FLoadoutData cachedloadoutblue;
-	FLoadoutData cachedloadoutorange;
+	TArray<int32_t> cachedloadoutblue;
+	TArray<int32_t> cachedloadoutorange;
+	TArray<FClientLoadoutOnlineProduct> cachedloadoutonlineblue;
+	TArray<FClientLoadoutOnlineProduct> cachedloadoutonlineorange;
 	bool needtosetfreeplaycolors;
 	UGFxData_PlayerBanner_TA* playerbanner = nullptr;
 	UTexture* bannerTexture = nullptr;
@@ -614,6 +637,7 @@ public:
 	std::string carsecondarycolorsforfreeplay = " ";
 	bool customcarcolors = false;
 	bool crateanimations = true;
+	std::vector<FProductInstanceID> TradedUpInstanceIDs;
 	UUIConfig_TA* UIConfig = nullptr;
 	EModalType createdmodaltype;
 	bool createmodalrn = false;
@@ -651,18 +675,28 @@ public:
 	URocketPass_TA* rpass = nullptr;
 	UGFxData_RocketPass_TA* rocketpass = nullptr;
 	UEventRecorderConfig_X* eventrecorder = nullptr;
+	UEOSMetricsConfig_X* eosmetrics = nullptr;
 	UShopsConfig_TA* shopcfg = nullptr;
 	UGFxData_Shops_TA* gfxshops = nullptr;
 	UChallengeManager_TA* challengemgr = nullptr;
 	UESportConfig_TA* esportsConfig = nullptr;
 	UOnlineGame_X* onlineGame = nullptr;
+	bool crashparty = false;
+	UOnlineGameParty_TA* onlineGameParty = nullptr;
 	UCheatManager_TA* cheatManager = nullptr;
 	bool shouldcreateparty = false;
 	bool shouldinvitehomie = false;
+	bool shouldeditinvite = false;
 	UOnlineSubsystem* subsy = nullptr;
 	URPCQueue_X_eventCreateBatchSingleRPC_Params* CurrentRequest = nullptr;
 	UPsyNetMessenger_X_execEventMessageReceived_Params* CurrentResponse = nullptr;
 	int teamindex;
+	bool rainbowwheelcolor = false;
+	bool customwheelcolor = false;
+	float customwheelcolors[3];
+	bool rainbowheadlights = false;	
+	bool customheadlights = false;
+	float customheadlightcolors[3];
 	float blueteamcolor[3];
 	float orangeteamcolor[3];
 	float customtrimcolors[3];
@@ -687,6 +721,7 @@ public:
 	bool breakingbaaaaaaaaaaaaaaaaaaa = false;
 	bool needtodisplaymodal = true;
 	int mainmenubackground;
+	bool giveeveryonealphaboost;
 	/*bool needtochangemenubg;*/
 	int changemenubgto;
 	FUniqueNetId netid;
@@ -702,6 +737,7 @@ public:
 	std::vector<std::vector<uint8_t>> psynettrafficimages;
 	int psynettrafficimage;
 	bool setblackcar = false;
+	bool offblackcar = false;
 	TArray<FOnlineProductData> faketradeproducts;
 	TArray<struct FProductInstanceID>	InstancesToGet;
 	bool premiumgaragemenu = false;
@@ -714,12 +750,18 @@ public:
 	URPC_ProductsPlayerGet_TA* customproducts;
 	bool disableinventorysyncs = false;
 	bool openpcccrate = false;
+	std::vector<unsigned char> decryptedPackets;
+	static inline bool ProcessInternalToBeHooked = true;
 	std::vector<TMap<URPCQueue_X_eventCreateBatchSingleRPC_Params*, UPsyNetMessenger_X_execEventMessageReceived_Params*>> requestresponsemaps;
 	static bool IsDetoured();
 	static void AttachDetour(const ProcessEventType& detourFunction); // Redirects the process event virtual function to our own void, for us to manually process later to the typedef.
 	static void DetachDetour(); // Called by the deconstuctor, necessary for if your DLL gets intentionally (or unintentionally) unloaded before your game exits.
 	static void ProcessEventDetour(class UObject* caller, class UFunction* function, void* params, void* result); // Process event gets detoured to this function, then we manually proxy it through to "ProcessEvent".
 	static bool IsEventBlacklisted(uint32_t functionIndex);
+	static void ProcessInternalDetour(class UObject* Caller, struct FFrame& Stack, RESULT_DECL);
+	static void HookProcessInternal(class UFunction* Function);
+	static void AttachProcessInternalDetour(const ProcessInternalType& detourFunction);
+	static bool IsProcessInternalDetoured();
 	void UnhookEvent(const std::string& function);
 	void BlacklistEvent(const std::string& functionName);
 	void WhitelistEvent(const std::string& functionName);
@@ -727,9 +769,7 @@ public:
 	void HookEventPre(uint32_t functionIndex, std::function<void(PreEvent&)> preHook);
 	void HookEventPost(const std::string& functionName, std::function<void(const PostEvent&)> postHook);
 	void HookEventPost(uint32_t functionIndex, std::function<void(const PostEvent&)> postHook);
-	void HookDelegate(const FScriptDelegate& delegate, std::function<void(const PostEvent&)> hook);
 	void Initialize(); // Initializes hooking events to functions.
-	void AttachAllDetours(uint8_t ProcessEventIndex, uint8_t CallFunctionIndex);
 };
 
 extern class EventsComponent Events;
