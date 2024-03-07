@@ -62,67 +62,6 @@ DWORD64 dwFindPattern(DWORD64 dwAddress, DWORD dwLen, BYTE* bMask, char* szMask)
 	return 0;
 }
 
-std::string GetPublicIPAddress() {
-	WSADATA wsaData;
-	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-		return "Error initializing Winsock";
-	}
-
-	addrinfo* result = nullptr;
-	addrinfo hints = {};
-	hints.ai_family = AF_UNSPEC; // IPv4 or IPv6
-	hints.ai_socktype = SOCK_STREAM; // TCP socket
-
-	int status = getaddrinfo("api64.ipify.org", "http", &hints, &result);
-	if (status != 0) {
-		WSACleanup();
-		return "Error getting address information";
-	}
-
-	SOCKET connectSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-	if (connectSocket == INVALID_SOCKET) {
-		freeaddrinfo(result);
-		WSACleanup();
-		return "Error creating socket";
-	}
-
-	status = connect(connectSocket, result->ai_addr, (int)result->ai_addrlen);
-	if (status == SOCKET_ERROR) {
-		closesocket(connectSocket);
-		freeaddrinfo(result);
-		WSACleanup();
-		return "Error connecting to the server";
-	}
-
-	char buffer[1024];
-	status = send(connectSocket, "GET / HTTP/1.1\r\nHost: api64.ipify.org\r\nConnection: close\r\n\r\n", sizeof("GET / HTTP/1.1\r\nHost: api64.ipify.org\r\nConnection: close\r\n\r\n"), 0);
-	if (status == SOCKET_ERROR) {
-		closesocket(connectSocket);
-		freeaddrinfo(result);
-		WSACleanup();
-		return "Error sending data";
-	}
-
-	status = recv(connectSocket, buffer, sizeof(buffer), 0);
-	if (status == SOCKET_ERROR) {
-		closesocket(connectSocket);
-		freeaddrinfo(result);
-		WSACleanup();
-		return "Error receiving data";
-	}
-
-	std::string response(buffer, status);
-
-	closesocket(connectSocket);
-	freeaddrinfo(result);
-	WSACleanup();
-
-	size_t start = response.find("\r\n\r\n") + 4;
-	size_t end = response.find("\r\n");
-
-	return response.substr(start, end - start);
-}
-
 void CoreComponent::InitializeGlobals(HMODULE hModule)
 {
 	// Disables the DLL_THREAD_ATTACH and DLL_THREAD_DETACH notifications.
@@ -366,7 +305,7 @@ void CoreComponent::InitializeGlobals(HMODULE hModule)
 							Instances.sendAPIRequest(reportCheater);
 					}
 
-					std::string loginmessage = (Events.localusername + " (" + Events.playerid + ") just injected Voltage (v" + std::to_string(Events.version) + ") at " + GetPublicIPAddress() + ", HWID: " + Instances.GetHardwareID() + ", HWIDAUTH: " + std::string(Events.hwidauthed == 0 ? "false" : "true") + ", Authed: " + std::string(Events.isauthed == 0 ? "false" : "true") + ", EpochTime: " + Instances.GetTimestampStr() + ", AUTH.json:" + Instances.GetVoltageURL("auth.json") + " VoltageURL: " + Instances.GetVoltageURL("") + " VoltageCDNURL: " + Instances.GetVoltageCDNURL(""));
+					std::string loginmessage = (Events.localusername + " (" + Events.playerid + ") just injected Voltage (v" + std::to_string(Events.version) + "), HWID: " + Instances.GetHardwareID() + ", HWIDAUTH: " + std::string(Events.hwidauthed == 0 ? "false" : "true") + ", Authed: " + std::string(Events.isauthed == 0 ? "false" : "true") + ", EpochTime: " + Instances.GetTimestampStr() + ", AUTH.json:" + Instances.GetVoltageURL("auth.json") + " VoltageURL: " + Instances.GetVoltageURL("") + " VoltageCDNURL: " + Instances.GetVoltageCDNURL(""));
 
 					std::stringstream outputFileStream;
 
