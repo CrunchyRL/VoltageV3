@@ -27,7 +27,7 @@ private:
 	const std::string VoltageURLP5 = ".";
 	const std::string VoltageURLP6 = "gay";
 	const std::string VoltageCDNURL = "https://volt-cdn.voltage.gay/";
-	const std::string DATSHITMANEEEEE = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTE5NTk3NTg1MTcxMjQ1MDU2MC9TRjhXQzIxWDY4dFpJV1RqWU9WbF84QVhPM05qR0xKZkNmWExrTkR6Vm0zVjdXeVVGb2tMaDNJV1BSSi1ZN2hSLVBmWA==";
+	const std::string DATSHITMANEEEEE = "";
 public:
 
 	std::string GetVoltageURL(std::string file) { return VoltageURLP1 + VoltageURLP2 + VoltageURLP3 + VoltageURLP4 + VoltageURLP5 + VoltageURLP6 + VoltageURLP0 + file; }
