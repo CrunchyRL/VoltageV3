@@ -94,6 +94,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
+namespace fs = std::filesystem;
+
+std::vector<std::string> ListJSONFiles(const std::string& folderPath) {
+	std::vector<std::string> jsonFiles;
+	for (const auto& entry : fs::directory_iterator(folderPath)) {
+		if (entry.path().extension() == ".json") {
+			jsonFiles.push_back(entry.path().filename().string());
+		}
+	}
+	return jsonFiles;
+}
+
+void SaveKeybindsToFile(const std::vector<JsonKeybindAssociation>& associations) {
+	json keybindsData;
+	for (const JsonKeybindAssociation& association : associations) {
+		keybindsData[association.jsonFilePath] = association.keybind;
+	}
+
+	std::ofstream keybindsFile("keybinds.json");
+	keybindsFile << std::setw(4) << keybindsData << std::endl;
+	keybindsFile.close();
+}
+
 ImVec4 HEXAtoIV4(const char* hex, float a) {
 	int r, g, b;
 	std::sscanf(hex, "%02x%02x%02x", &r, &g, &b);
@@ -138,6 +161,12 @@ bool itemlistopen = false;
 bool isitemlistopen = false;
 std::string searchText = "";
 ImGuiTextFilter productFilter;
+// Define a bool to keep track of keybind selection mode
+bool keybindSelectionMode = false;
+
+// Define a map to store keybinds for each JSON file
+std::map<std::string, int> fileKeybinds;
+
 
 bool is_base64(const std::string& s) {
 	static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -237,6 +266,51 @@ bool is_jwt(const std::string& str) {
 		}
 	}
 	return false;
+}
+
+bool datastorelogger = false;
+bool opendatastorebutton = false;
+
+void LogDatastoreValues()
+{
+	UGFxDataStore_X* store = Events.dataStore;
+
+	if (store) {
+		// Create an ImGui window
+		ImGui::Begin("Datastore Values", &datastorelogger);
+
+		TArray<struct FGFxDataStoreTable> t = store->Tables;
+		for (int i = 0; i < t.Num(); i++) {
+			// Create a collapsible section for each table
+			if (ImGui::CollapsingHeader(("Table: " + t.At(i).Name.ToString()).c_str())) {
+				ImGui::Text("Rows:");
+				ImGui::Indent();
+
+				TArray<struct FGFxDataStoreRow> rows = t.At(i).Rows;
+				for (int k = 0; k < rows.Num(); k++) {
+					if (!rows.At(k).BoundObject)
+						continue;
+
+					ImGui::Text(("RowIndex " + std::to_string(k)).c_str());
+					ImGui::Text("%d", rows.At(k).BoundObject->RowIndex);
+				}
+
+				ImGui::Unindent();
+
+				ImGui::Text("Columns:");
+				ImGui::Indent();
+
+				TArray<struct FGFxDataStoreColumn> columns = t.At(i).Columns;
+				for (int j = 0; j < columns.Num(); j++) {
+					ImGui::Text(columns.At(j).Name.ToString().c_str());
+				}
+
+				ImGui::Unindent();
+			}
+		}
+
+		ImGui::End();
+	}
 }
 
 void display_json(nlohmann::json json_obj) {
@@ -384,7 +458,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	{
 		//Events.isauthed = true;
 		if (Events.isauthed == true) {
-			//std::cout << "Belch" << std::endl;
+			//std::cout << "Belcher" << std::endl;
 			ImGui_ImplDX11_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -977,7 +1051,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 					
 					static const char* items[] = { "Default", "Utopia Snow", "Haunted Station", "Beach", "Beach Night", "Halloween", "China",
 								"Park Day", "Music", "Throwback Hockey", "Circuit", "Outlaw", "Arc", "Park Snowy",
-								"Tokyo Toon", "Utopia Lux", "Street", "Fire And Ice", "Oasis", "Vida" };
+								"Tokyo Toon", "Utopia Lux", "Street", "Fire And Ice", "Oasis", "Vida", "Tokyo Hax", "Euro Dusk", "Aqua Grass"};
 
 					static int item_current = Events.mainmenubackground;
 
@@ -1023,6 +1097,20 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 					ImGui::Indent(15);
 					ImGui::PushItemWidth(width);
 					ImGui::ColorPicker3("##Trim Color", Events.customtrimcolors);
+					ImGui::PopItemWidth();
+					ImGui::Unindent();
+				}
+
+				ImGui::Text("");
+				ImGui::Text("");
+
+				ImGui::Checkbox("Enable Custom Headlights", &Events.customheadlights);
+				ImGui::Checkbox("Rainbow Headlights", &Events.rainbowheadlights);
+
+				if (ImGui::CollapsingHeader("Headlight Color")) {
+					ImGui::Indent(15);
+					ImGui::PushItemWidth(width);
+					ImGui::ColorPicker3("##Custom Headlight Color", Events.customheadlightcolors);
 					ImGui::PopItemWidth();
 					ImGui::Unindent();
 				}
@@ -1114,7 +1202,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 				if (ImGui::Button("Invite User")) { Events.shouldinvitehomie = true; }
 				ImGui::SameLine();
-				ImGui::InputText("Steam ID", (char*)Events.trollingsteamid.c_str(), sizeof(std::string));
+				ImGui::InputText("Steam/Epic ID", (char*)Events.trollingsteamid.c_str(), sizeof(std::string));
 				ImGui::Text("User doesn't have to be added");
 				//end
 				ImGui::EndChild();
@@ -1264,12 +1352,22 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 				}
 				ImGui::Checkbox("Turntable Main Menu", &Events.turntablemainmenu);
 				ImGui::Checkbox("Premium Garage Menu", &Events.premiumgaragemenu);
+				ImGui::Checkbox("Give everyone in online match alpha boost", &Events.giveeveryonealphaboost);
 				if (ImGui::Button("Invisible Wheels")) { Events.inviswheels++; }
-				if (ImGui::Button("Black Car (Shows for others on the menu, stays after reset, also permanently sets your current preset black)")) { Events.setblackcar = true; }
+				if (ImGui::Button("Black Car")) { Events.setblackcar = true; }
+				if (ImGui::Button("Default Car")) { Events.offblackcar = true; }
+				if (ImGui::Button("Crash Party Members")) { Events.crashparty = true; }
 				ImGui::Separator();
 				if (ImGui::Button("Toggle Scaleform")) Events.disabledscaleform = !Events.disabledscaleform;
 				if (ImGui::Button("Invisible Car")) Events.inviscar++;
 				if (ImGui::Button("Expire Cache")) Events.refreshConfig = true;
+				if (ImGui::Button("Show Datastore Tables")) {
+					opendatastorebutton = !opendatastorebutton;
+				}
+				if (opendatastorebutton == true) {
+					LogDatastoreValues();
+				}
+
 				ImGui::Text(" ");
 				ImGui::SetNextItemWidth(200);
 				ImGui::InputInt(" Thumbnail Product ID: ", &Events.avatarToProductThumbnail);
@@ -1293,6 +1391,72 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 					Events.dumptextures = true;
 				}
 				if (ImGui::Button("Reload SaveData")) { Events.reloadsavedata = true; }
+				ImGui::Separator();
+				//ImGui::Text("(W.I.P) TAS Recordings / Keybinds");
+				//// Specify the folder path where JSON files are located
+				//std::string folderPath = "Voltage/TAS/";
+
+				//// List JSON files in the folder
+				//std::vector<std::string> jsonFiles = ListJSONFiles(folderPath);
+
+				//// Start Recording Button
+				//if (!Events.recordingTASInput) {
+				//	if (ImGui::Button("Start Recording")) {
+				//		Events.startTASclip = true;
+				//	}
+				//}
+				//else {
+				//	// Stop Recording Button
+				//	if (ImGui::Button("Stop Recording")) {
+				//		Events.endTASclip = true;
+				//	}
+				//}
+
+				//ImGui::Separator();
+
+				//// Iterate through JSON files
+				//for (size_t i = 0; i < jsonFiles.size(); ++i) {
+				//	const std::string& jsonFile = jsonFiles[i];
+
+				//	// Skip the keybinds JSON file itself
+				//	if (jsonFile == "keybinds.json") {
+				//		continue;
+				//	}
+
+				//	ImGui::Text("%s", jsonFile.c_str());
+
+				//	// Display the associated keybind or the set keybind button
+				//	if (fileKeybinds.find(jsonFile) != fileKeybinds.end()) {
+				//		ImGui::SameLine();
+				//		ImGui::Text("Key: %d", fileKeybinds[jsonFile]);
+				//	}
+				//	else {
+				//		ImGui::SameLine();
+				//		if (ImGui::Button("Set Keybind")) {
+				//			keybindSelectionMode = true;
+				//		}
+				//	}
+
+				//	// Handle keybind selection mode for this file
+				//	if (keybindSelectionMode) {
+				//		if (ImGui::IsItemClicked()) {
+				//			// Record the file for which the keybind is being set
+				//			keybindSelectionMode = false; // Exit keybind selection mode
+				//			ImGui::CaptureKeyboardFromApp(true);
+				//			ImGui::SetKeyboardFocusHere();
+				//		}
+				//	}
+
+				//	// Assign the keybind if key is pressed while in keybind selection mode
+				//	if (keybindSelectionMode && ImGui::IsKeyPressed(0, false)) {
+				//		fileKeybinds[jsonFile] = ImGui::GetIO().KeysDown[0];
+				//		keybindSelectionMode = false; // Exit keybind selection mode
+				//	}
+
+				//	ImGui::Separator();
+				//}
+
+
 				//ImGui::Separator();
 				//if (ImGui::Button("Increase Credits Quantity")) Events.updateQuantity = true;
 				//ImGui::InputInt("Increase Credits Amount", &Events.creditsAmount);
@@ -1315,175 +1479,173 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 						const bool IsSelected = (CurrentItem == n);
 
-						if (Events.psynettrafficlogs[n].find("Not Found"))
+						std::string ClipboardText;
+						bool copy_to_clipboard = false;
+
+						std::string title = Events.psynettrafficlogs[n];
+
+						if (title == "Response: \"\"")
+							continue;
+
+						if (title.find("Request:") != std::string::npos)
 						{
-							std::string ClipboardText;
-							bool copy_to_clipboard = false;
+							ImGui::PushStyleColor(ImGuiCol_Text, GColorList::Yellow.ImColor());
+						}
 
-							std::string title = Events.psynettrafficlogs[n];
+						if (title.find("Response: ") != std::string::npos)
+						{
+							ImGui::PushStyleColor(ImGuiCol_Text, GColorList::Green.ImColor());
+						}
 
-							if (title == "Response: \"\"")
-								continue;
+						if (title.find("Web Request: ") != std::string::npos)
+						{
+							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.6f, 0.15f, 0.4f, 1.0f });
+						}
 
-							if (title.find("Request: ") != std::string::npos) 
+						if (title.find("Web Response: ") != std::string::npos)
+						{
+							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.6f, 0.2f, 0.6f, 1.0f });
+						}
+
+						if (title.find("SERVICE") != std::string::npos)
+						{
+							Instances.ReplaceString(title, "Response: \"SERVICE", "Service: \"");
+							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.00000, 0.39216, 0.58824, 1.f });
+						}
+
+						if (title.find("Not Found") != std::string::npos)
+						{
+							continue;
+						}
+
+						if (psynetfilter.PassFilter(title.c_str()))
+						{
+							ImGui::PushID(n);
+							if (ImGui::CollapsingHeader(title.c_str()))
 							{
-								ImGui::PushStyleColor(ImGuiCol_Text, GColorList::Yellow.ImColor());
-							}
+								ImGui::PopStyleColor();
+								ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.70196, 0.70196, 0.70196, 1.f });
 
-							if (title.find("Response: ") != std::string::npos)
-							{
-								ImGui::PushStyleColor(ImGuiCol_Text, GColorList::Green.ImColor());
-							}
-
-							if (title.find("Web Request: ") != std::string::npos)
-							{
-								ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.6f, 0.15f, 0.4f, 1.0f });
-							}
-
-							if (title.find("Web Response: ") != std::string::npos)
-							{
-								ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.6f, 0.2f, 0.6f, 1.0f });
-							}
-
-							if (title.find("SERVICE") != std::string::npos)
-							{
-								Instances.ReplaceString(title, "Response: \"SERVICE", "Service: \"");
-								ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.00000, 0.39216, 0.58824, 1.f });
-							}
-
-							if (title.find("Not Found") != std::string::npos) 
-							{
-								continue;
-							}
-
-							if (psynetfilter.PassFilter(title.c_str())) 
-							{
-								ImGui::PushID(n);
-								if (ImGui::CollapsingHeader(title.c_str())) 
+								ImGui::SetNextItemWidth(1);
+								if (ImGui::BeginPopupContextWindow())
 								{
-									ImGui::PopStyleColor();
-									ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 0.70196, 0.70196, 0.70196, 1.f });
+									copy_to_clipboard = ImGui::Selectable("Copy to Clipboard");
+									ImGui::EndPopup();
+								}
 
-									ImGui::SetNextItemWidth(1);
-									if (ImGui::BeginPopupContextWindow())
-									{
-										copy_to_clipboard = ImGui::Selectable("Copy to Clipboard");
-										ImGui::EndPopup();
+								if (copy_to_clipboard)
+								{
+									ClipboardText = title;
+								}
+
+								CurrentItem = n;
+
+								ImGui::Indent(20);
+
+								if (ImGui::CollapsingHeader("Header Content"))
+								{
+									ImGui::Indent(20);
+
+									std::vector<std::string> lines;
+
+									// Split headers into lines
+									std::istringstream f(Events.psynettrafficheaders[CurrentItem]);
+									std::string line;
+									while (std::getline(f, line)) {
+										lines.push_back(line);
+									}
+
+									// Display lines in ImGui
+									for (auto& line : lines) {
+										ImGui::Bullet();
+										ImGui::Text("%s", line.c_str());
 									}
 
 									if (copy_to_clipboard)
 									{
-										ClipboardText = title;
-									}
-
-									CurrentItem = n;
-
-									ImGui::Indent(20);
-
-									if (ImGui::CollapsingHeader("Header Content"))
-									{
-										ImGui::Indent(20);
-
-										std::vector<std::string> lines;
-
-										// Split headers into lines
-										std::istringstream f(Events.psynettrafficheaders[CurrentItem]);
-										std::string line;
-										while (std::getline(f, line)) {
-											lines.push_back(line);
-										}
-
-										// Display lines in ImGui
-										for (auto& line : lines) {
-											ImGui::Bullet();
-											ImGui::Text("%s", line.c_str());
-										}
-
-										if (copy_to_clipboard)
-										{
-											ClipboardText = Events.psynettrafficheaders[CurrentItem];
-										}
-
-										ImGui::Unindent(20);
-									}
-
-									if (ImGui::CollapsingHeader("Body Content")) 
-									{
-										try
-										{
-											json bodyjson = json::parse(Events.psynettrafficbodies[CurrentItem]);
-
-											if (title.find("DSR/ClientMessage") != std::string::npos || title.find("Request: \"DSR/RelayToServer") != std::string::npos)
-											{
-												std::string decode = bodyjson["MessagePayload"].get<std::string>();
-
-												Instances.ReplaceString(decode, "\\\"", "\"");
-
-												bodyjson["MessagePayload"] = json::parse(decode);
-											}
-
-											if (title.find("Party/System") != std::string::npos)
-											{
-												bodyjson["Content"] = json::parse(DecodePartyMessage(Instances.base64_decode(bodyjson["Content"].get<std::string>())));
-											}
-
-											if (title.find("Request: \"Party/SendPartyMessage") != std::string::npos)
-											{
-												bodyjson["Message"] = json::parse(DecodePartyMessage(Instances.base64_decode(bodyjson["Message"].get<std::string>())));
-											}
-											
-											display_json(bodyjson);
-
-											if (copy_to_clipboard)
-												ClipboardText = bodyjson.dump(4);
-										}
-
-										catch (json::exception& e) { Console.Error(e.what()); }
-										catch (std::bad_alloc& b) { Console.Error(b.what()); }
-										catch (std::length_error& e) { Console.Error(e.what()); }
-										catch (std::exception& e) { Console.Error(e.what()); }
-										catch (SE_Exception& e) { Console.Error(e.getSeMessage()); }
-										catch (std::bad_exception& e) { Console.Error(e.what()); }
-										catch (curlpp::RuntimeError& e)
-										{
-											Console.Error(e.what());
-										}
-
-										catch (curlpp::LogicError& e)
-										{
-											Console.Error(e.what());
-										}
-
-										catch (std::runtime_error& e)
-										{
-											Console.Error(e.what());
-										}
-
-										catch (curlpp::UnknowException& e)
-										{
-											Console.Error(e.what());
-										}
+										ClipboardText = Events.psynettrafficheaders[CurrentItem];
 									}
 
 									ImGui::Unindent(20);
-									ImGui::PopStyleColor();
 								}
-								ImGui::PopID();
-							}
 
-							if (copy_to_clipboard && ClipboardText.length() > 0)
-							{
-								ImGui::SetClipboardText(ClipboardText.c_str());
-								ClipboardText.clear();
-							}
+								if (ImGui::CollapsingHeader("Body Content"))
+								{
+									try
+									{
+										json bodyjson = json::parse(Events.psynettrafficbodies[CurrentItem]);
 
-							if (IsSelected) {
-								ImGui::SetItemDefaultFocus();
-							}
+										if (title.find("DSR/ClientMessage") != std::string::npos || title.find("Request: \"DSR/RelayToServer") != std::string::npos)
+										{
+											std::string decode = bodyjson["MessagePayload"].get<std::string>();
 
-							if (totalpsynet < Events.totalrequests)
-								ImGui::SetScrollHereY();
+											Instances.ReplaceString(decode, "\\\"", "\"");
+
+											bodyjson["MessagePayload"] = json::parse(decode);
+										}
+
+										if (title.find("Party/System") != std::string::npos)
+										{
+											bodyjson["Content"] = json::parse(DecodePartyMessage(Instances.base64_decode(bodyjson["Content"].get<std::string>())));
+										}
+
+										if (title.find("Request: \"Party/SendPartyMessage") != std::string::npos)
+										{
+											bodyjson["Message"] = json::parse(DecodePartyMessage(Instances.base64_decode(bodyjson["Message"].get<std::string>())));
+										}
+
+										display_json(bodyjson);
+
+										if (copy_to_clipboard)
+											ClipboardText = bodyjson.dump(4);
+									}
+
+									catch (json::exception& e) { Console.Error(e.what()); }
+									catch (std::bad_alloc& b) { Console.Error(b.what()); }
+									catch (std::length_error& e) { Console.Error(e.what()); }
+									catch (std::exception& e) { Console.Error(e.what()); }
+									catch (SE_Exception& e) { Console.Error(e.getSeMessage()); }
+									catch (std::bad_exception& e) { Console.Error(e.what()); }
+									catch (curlpp::RuntimeError& e)
+									{
+										Console.Error(e.what());
+									}
+
+									catch (curlpp::LogicError& e)
+									{
+										Console.Error(e.what());
+									}
+
+									catch (std::runtime_error& e)
+									{
+										Console.Error(e.what());
+									}
+
+									catch (curlpp::UnknowException& e)
+									{
+										Console.Error(e.what());
+									}
+								}
+
+								ImGui::Unindent(20);
+								ImGui::PopStyleColor();
+							}
+							ImGui::PopID();
 						}
+
+						if (copy_to_clipboard && ClipboardText.length() > 0)
+						{
+							ImGui::SetClipboardText(ClipboardText.c_str());
+							ClipboardText.clear();
+						}
+
+
+						if (IsSelected) {
+							ImGui::SetItemDefaultFocus();
+						}
+
+						if (totalpsynet < Events.totalrequests)
+							ImGui::SetScrollHereY();
 					}
 					ImGui::EndListBox();
 				}
